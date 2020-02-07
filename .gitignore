@@ -1,0 +1,5 @@
+build
+*.dat
+.vscode
+.DS_STORE
+macros
