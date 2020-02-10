@@ -1,0 +1,6 @@
+[ libRPCIA ]
+# List of selected classes
+class Event
+class Hit
+header event.h
+header hit.h

@@ -7,12 +7,10 @@
 #include <sstream>
 #include <vector>
 
-// #include "packet_reader.hpp"
-#include "event.hpp"
-#include "event_builder.hpp"
-#include "histogram_builder.hpp"
-#include "histograms.hpp"
-// #include "tree_builder.hpp"
+#include "event.h"
+#include "event_builder.h"
+#include "histogram_builder.h"
+#include "histograms.h"
 
 using namespace std;
 

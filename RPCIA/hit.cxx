@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "hit.hpp"
-#include "utils.hpp"
+#include "hit.h"
+#include "utils.h"
 
 ClassImp(Hit);
 

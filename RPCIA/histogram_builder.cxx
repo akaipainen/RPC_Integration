@@ -1,4 +1,4 @@
-#include "histogram_builder.hpp"
+#include "histogram_builder.h"
 
 HistogramBuilder::HistogramBuilder(TFile *root_file, std::string tree_name)
  : root_file(root_file), num_hist(0) {

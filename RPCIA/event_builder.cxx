@@ -1,6 +1,6 @@
 #include <iterator>
 
-#include "event_builder.hpp"
+#include "event_builder.h"
 
 EventBuilder::EventBuilder(TFile *root_file)
  : root_file(root_file), event_counter(256) {

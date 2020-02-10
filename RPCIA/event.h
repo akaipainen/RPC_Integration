@@ -6,7 +6,7 @@
 #include <TObject.h>
 #include <TClonesArray.h>
 
-#include "hit.hpp"
+#include "hit.h"
 
 class Event : public TObject {
 private:

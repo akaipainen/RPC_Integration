@@ -1,7 +1,7 @@
 #include <sstream>
 #include <iostream>
 
-#include "event.hpp"
+#include "event.h"
 
 ClassImp(Event);
 

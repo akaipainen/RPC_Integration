@@ -1,4 +1,5 @@
 build
+install
 *.dat
 .vscode
 .DS_STORE

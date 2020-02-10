@@ -6,8 +6,8 @@
 #include <TFile.h>
 #include <TTree.h>
 
-#include "event.hpp"
-#include "utils.hpp"
+#include "event.h"
+#include "utils.h"
 
 class EventBuilder {
 private:

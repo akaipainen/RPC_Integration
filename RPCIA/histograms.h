@@ -6,8 +6,8 @@
 #include <TH1.h>
 #include <TClonesArray.h>
 
-#include "event.hpp"
-#include "hit.hpp"
+#include "event.h"
+#include "hit.h"
 
 namespace histogram 
 {
