@@ -1,84 +1,147 @@
-# Module
-set(MODULE RPCIA)
-add_definitions(-D_MODULE_="${MODULE}")
+cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
 
-# Module include folder
-include_directories(${RpcIA_SOURCE_DIR}/${MODULE})
+# Refuse to compile against a wrong ROOT version
+set(ROOT_VERSION_MIN_5 5.99.99)
+set(ROOT_VERSION_MIN_6 6.18.00)
 
-# Additional include folders in alphabetical order except ROOT
-include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
+foreach(p CMP0005  # Properly escape preprocessor definitions (v2.6, v3.0.2)
+          CMP0025  # Compiler id for Apple Clang is now AppleClang (v3.0)
+          CMP0042  # MACOSX_RPATH is enabled by default (v3.0)
+          CMP0053  # Simplify variable reference and escape sequence evaluation (v3.1.3)
+          CMP0068  # RPATH settings on macOS do not affect install_name (v3.9 and newer)
+       )
+if(POLICY ${p})
+    cmake_policy(SET ${p} NEW)
+  endif()
+endforeach()
 
-# Set sources in alphabetical order
-set(SRCS
-    event_builder.cxx
-    event.cxx
-    histogram_builder.cxx
-    hit.cxx
-    )
+project(RpcIA CXX) # Can add C if using C code
 
-# Headers from sources
-string(REPLACE ".cxx" ".h" HDRS "${SRCS}")
+message(STATUS "CMake platform: ${CMAKE_SYSTEM}")
+message(STATUS "Build folder: ${RpcIA_BINARY_DIR}")
+message(STATUS "Source folder: ${RpcIA_SOURCE_DIR}")
+message(STATUS "Installation folder: ${CMAKE_INSTALL_PREFIX}")
 
-# Additional headers
-# list(APPEND HDRS "header1.h" "header2.h")
+# CMake supports different build types by default. We want the
+# DEBUG build type to have "-g -O0" flags. By default it only has "-g"
+set(CMAKE_CXX_FLAGS_DEBUG "-g -O0 -DDEBUG -D__DEBUG")
 
-# Generate the dictionary
-get_directory_property(incdirs INCLUDE_DIRECTORIES)
-generate_dictionary("${MODULE}" "${MODULE}LinkDef.h" "${HDRS}" "${incdirs}")
+# You can change the build type using
+# cmake -DCMAKE_BUILD_TYPE=DEBUG | RELEASE | RELWITHDEBINFO ...
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE RELWITHDEBINFO)
+endif(NOT CMAKE_BUILD_TYPE)
+string(TOUPPER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+set(CMAKE_ALLOWED_BUILD_TYPES DEBUG RELEASE RELWITHDEBINFO)
+list(FIND CMAKE_ALLOWED_BUILD_TYPES "${CMAKE_BUILD_TYPE}" VALID_BUILD_TYPE)
+if(${VALID_BUILD_TYPE} EQUAL -1)
+    string(REPLACE ";" ", " CMAKE_ALLOWED_BUILD_TYPES_FLAT "${CMAKE_ALLOWED_BUILD_TYPES}")
+    message(FATAL_ERROR "Invalid build type ${CMAKE_BUILD_TYPE}. Use one of: ${CMAKE_ALLOWED_BUILD_TYPES_FLAT}.")
+endif(${VALID_BUILD_TYPE} EQUAL -1)
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE} (${CMAKE_CXX_FLAGS_${CMAKE_BUILD_TYPE}})")
 
-# Generate the ROOT map
-set(LIBDEPS "")
-generate_rootmap("${MODULE}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}LinkDef.h")
+if(CMAKE_INSTALL_PREFIX STREQUAL "${RpcIA_SOURCE_DIR}")
+    message(FATAL_ERROR "Please choose a different installation point than the source tree.")
+endif(CMAKE_INSTALL_PREFIX STREQUAL "${RpcIA_SOURCE_DIR}")
 
-# Create object to be used in case of static libraries
-# Otherwise sources will be compiled twice
-add_library(${MODULE}-object OBJECT ${SRCS} G__${MODULE}.cxx)
-# Add a library to the project using the object
-add_library(${MODULE} SHARED $<TARGET_OBJECTS:${MODULE}-object>)
+# Path to additional modules
+set(CMAKE_MODULE_PATH "${RpcIA_SOURCE_DIR}/cmake")
 
-# Setting the correct headers for the object as gathered from the dependencies
-target_include_directories(${MODULE}-object PUBLIC $<TARGET_PROPERTY:${MODULE},INCLUDE_DIRECTORIES>)
-set_target_properties(${MODULE}-object PROPERTIES COMPILE_DEFINITIONS $<TARGET_PROPERTY:${MODULE},COMPILE_DEFINITIONS>)
+# Check some compiler flags
+include(CheckCXXCompilerFlag)
+check_cxx_compiler_flag(-Wno-error=misleading-indentation CC_WNOERROR_MISLEADING_INDENTATION)
 
-# Public include folders that will be propogated to the dependencies
-target_include_directories(${MODULE} PUBLIC ${incdirs})
+# Shared library suffix for non windows
+if(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
+    set(CMAKE_SHARED_LIBRARY_SUFFIX .so)    
+endif(NOT CMAKE_SYSTEM_NAME STREQUAL Windows)
 
-# Additional compilation flags
-set_target_properties(${MODULE} PROPERTIES COMPILE_FLAGS "")
+# Set static build on
+# set(RPCIA_STATIC true)
 
-# Linking the libraries
-target_link_libraries(${MODULE} ${LIBDEPS})
+# ROOT configuration mandatory
+# Setting variables in cache to be accessible by ccmake
+set(ROOTSYS CACHE STRING "ROOT installation folder")
+if(ROOTSYS)
+    find_package(ROOT REQUIRED)
 
-# System dependent: Modify the way the library is build
-if(${CMAKE_SYSTEM} MATCHES Darwin)
-    set_target_properties(${MODULE} PROPERTIES LINK_FLAGS "-undefined dynamic_lookup")
-endif(${CMAKE_SYSTEM} MATCHES Darwin)
+    if(ROOT_VERSION_MAJOR EQUAL 5)
+        set(ROOT_VERSION_MIN "${ROOT_VERSION_MIN_5}")
+    elseif(ROOT_VERSION_MAJOR EQUAL 6)
+        set(ROOT_VERSION_MIN "${ROOT_VERSION_MIN_6}")
+    else()
+        message(FATAL_ERROR "RpcIA works with ROOT 5 or 6 only")
+    endif()
 
+    if(ROOT_VERSION_NORM VERSION_LESS "${ROOT_VERSION_MIN}")
+        message(FATAL_ERROR "RpcIA requires at least ROOT ${ROOT_VERSION_MIN} (you have ${ROOT_VERSION_NORM})")
+    endif(ROOT_VERSION_NORM VERSION_LESS "${ROOT_VERSION_MIN}")
+
+else(ROOTSYS)
+    message(FATAL_ERROR "ROOT installation not found.\nPlease point to the ROOT installation using -DROOTSYS=ROOT_INSTALL_DIR")
+endif(ROOTSYS)
+
+# Enable C++11 by default if found in ROOT
+if(ROOT_HAS_CXX11 AND NOT DISABLE_CXX11)
+    message(STATUS "Enabling C++11")
+    # if(NOT ${CMAKE_CXX_FLAGS} MATCHES "-std=c\\+\\+11")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    # endif(NOT ${CMAKE_CXX_FLAGS} MATCHES "-std=c\\+\\+11")
+endif(ROOT_HAS_CXX11 AND NOT DISABLE_CXX11)
+
+# Enable C++14 by default if found in ROOT
+if(ROOT_HAS_CXX14 AND NOT DISABLE_CXX14)
+    message(STATUS "Enabling C++14")
+    # message("Current flags: ${CMAKE_CXX_FLAGS}")
+    # if(NOT ${CMAKE_CXX_FLAGS} MATCHES "-std=c\\+\\+14")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
+    # endif(NOT ${CMAKE_CXX_FLAGS} MATCHES "-std=c\\+\\+14")
+    # message("Current flags: ${CMAKE_CXX_FLAGS}")
+endif(ROOT_HAS_CXX14 AND NOT DISABLE_CXX14)
+
+# ROOT dictionaries and maps
+include(CMakeRPCIA)
+
+# Generating the RpcIA-config.cmake file
+configure_file(${PROJECT_SOURCE_DIR}/cmake/RpcIA-config.cmake.in ${CMAKE_BINARY_DIR}/version/RpcIA-config.cmake @ONLY)
+install(FILES ${PROJECT_BINARY_DIR}/version/RpcIA-config.cmake DESTINATION etc)
+
+# General flags -> Should be moved into a configuration file
+set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
+# Avoid problems with -fPIE (set automatically by the previous line).
+set(CMAKE_CXX_COMPILE_OPTIONS_PIE "")
+set(CMAKE_C_COMPILE_OPTIONS_PIE "")
+set(CMAKE_Fortran_COMPILE_OPTIONS_PIE "")
+set(CMAKE_NO_SYSTEM_FROM_IMPORTED TRUE)
+
+# Be sure about where libraries and binaries are put
+set(LIBRARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/lib")
+set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+
+# Build targets with install rpath on Mac to dramatically speed up installation
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
+if("${isSystemDir}" STREQUAL "-1")
+  if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+    set(CMAKE_INSTALL_RPATH "@loader_path/../lib")
+  endif()
+endif()
+if(CMAKE_SYSTEM_NAME STREQUAL "Darwin")
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+else()
+  set(CMAKE_SKIP_BUILD_RPATH FALSE)
+  set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+  if("${isSystemDir}" STREQUAL "-1")
+    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  endif("${isSystemDir}" STREQUAL "-1")
+endif()
+unset(isSystemDir)
+
+add_subdirectory(3rdParty)
+add_subdirectory(BASE)
+add_subdirectory(MAPPING)
+add_subdirectory(RECON)
+add_subdirectory(RAW)
 add_subdirectory(executables)
-
-# Installation
-install(TARGETS ${MODULE}
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
-
-install(FILES ${HDRS} DESTINATION include)
-
-# Static version
-# if(RPCIA_STATIC)
-#     add_library(${MODULE}-static STATIC $<TARGET_OBJECTS:${MODULE}-object>)
-#     set_target_properties(${MODULE}-static PROPERTIES OUTPUT_NAME ${MODULE})
-    
-#     # List of shared dependencies / the name of the variable containing the list of static ones
-#     generate_static_dependencies("${RPCIA_DEPENDENCIES}" "STATIC_RPCIA_DEPENDENCIES")
-#     target_link_libraries(${MODULE}-static ${STATIC_RPCIA_DEPENDENCIES} Root RootExtra)
-
-#     # Public include folders that will be propagated to the dependecies
-#     target_include_directories(${MODULE}-static PUBLIC ${incdirs})
-
-#     set_target_properties(${MODULE}-static PROPERTIES LINK_FLAGS "-Wl,--whole-archive")
-
-#     # Installation
-#     install(TARGETS ${MODULE}-static
-#             ARCHIVE DESTINATION lib
-#             LIBRARY DESTINATION lib)
-# endif(RPCIA_STATIC)

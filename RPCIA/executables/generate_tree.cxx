@@ -1,107 +1,61 @@
-#include <cstdlib>
+// #include <cstdlib>
 #include <iostream>
-#include <getopt.h>
-#include <string>
-#include <fstream>
-#include <bitset>
-#include <sstream>
-#include <vector>
+// #include <getopt.h>
+// #include <string>
+// #include <fstream>
+// #include <bitset>
+// #include <sstream>
+// #include <vector>
 
-#include "event.h"
-#include "event_builder.h"
-#include "histogram_builder.h"
-#include "histograms.h"
+// #include "nlohmann/json.hpp"
 
-using namespace std;
+// #include "event.h"
+// #include "event_builder.h"
+// #include "histogram_builder.h"
+// #include "histograms.h"
+// #include "utils.h"
+
+#include "raw_reader.h"
+#include "loader.h"
+#include "digit_store.h"
+#include "digit_maker.h"
+
+#include <TTree.h>
+
+// using json = nlohmann::json;
 
 void print_help() {
-    cout << "-f, --file: Filename of network data (should be .dat)" << endl
-         << "-p, --packets: Number of packets to process" << endl
-         << "-m, --mode: Measurement mode (Should be `leading`, `pair`, or `trailing`)" << endl
-         << "-n --no_trigger: Disable trigger" << endl
-         << "-h​,​ --help​: Displays this help message" << endl;
+    std::cout << "Usage: ./gen_tree config_file num_packets" << std::endl;
+    exit(1);
 }
 
-struct Options {
-    string file;
-    int packets;
-    int mode;
-    bool trigger;
-};
-
-Options parse_options(int argc, char *argv[]) {
-    opterr = true;
-    int choice;
-    int option_index = 0;
-    option long_options[] = {
-        { "file",       required_argument, nullptr, 'f' },
-        { "packets",    required_argument, nullptr, 'p' },
-        { "mode",       required_argument, nullptr, 'm' },
-        { "no_trigger", no_argument,       nullptr, 'n' },
-        { "help",       no_argument,       nullptr, 'h' },
-        { nullptr,      0,                 nullptr, '\0'}
-    };
-
-    Options options = {
-        "",   // file
-        0,    // packets
-        0, // mode
-        true  // trigger
-    };
-    
-    while ((choice = getopt_long(argc, argv, "f:th", long_options, &option_index)) != -1) {
-        switch (choice) {
-            case 'f':
-                options.file = optarg;
-                break;
-
-            case 'p':
-                options.packets = atoi(optarg);
-                break;
-
-            case 'm':
-                options.mode = atoi(optarg);
-                break;
-
-            case 't':
-                options.trigger = false;
-                break;
-                
-            case 'h':
-                print_help();
-                exit(0);
-                
-            default:
-                cerr << "Invalid option: " << choice << '\n';
-                exit(1);
-        }
-    }
-    
-    return options;
-};
-
 int main(int argc, char *argv[]) {
-    Options options = parse_options(argc, argv);
+    RawReader *raw_reader = new RawReader();
+    raw_reader->open(argv[1]);
+    raw_reader->next();
 
-    ifstream file(options.file);
-    if (!file.is_open()) {
-        throw "File not found.";
+    Loader *loader = new Loader();
+    loader->open("official_.root");
+    TTree *tree = loader->get_tree_loader();
+
+    DigitStore *digit_store = new DigitStore(); // Stores hits of a single event
+    digit_store->connect(*tree); // Connect to the branch of TTree
+
+    // ClusterStore *cluster_store = ClusterStore::create();
+    // cluster_store->connect(tree);
+    
+    DigitMaker *digit_maker = new DigitMaker(); 
+    while (!raw_reader->is_done()) { // Has more events to load
+        digit_maker->raw_to_digits(raw_reader, digit_store); // Load digits into event
+        
+        tree->Fill(); // Fill event into tree
+        digit_store->clear();
     }
+    loader->write();
 
-    TFile *root_file = new TFile("official.root", "recreate");
-
-    EventBuilder eb(root_file);
-    Event event;
-    while(file >> event) {
-        eb.add_event(event);
-    }
-    eb.close();
-
-    HistogramBuilder hb(root_file, "tree");
-    hb.add_hist(histogram::noise_rate_per_strip);
-    hb.close();
-
-    root_file->Close();
+    delete loader;
+    delete raw_reader;
+    delete digit_maker;
 
     return 0;
 }

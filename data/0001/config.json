@@ -1,0 +1,10 @@
+{
+    "id": 1,
+    "message": "",
+    "filename": "5700.dat",
+
+    "trigger": true,
+    "measurement_mode": "pair",
+
+    "trigger_window_us": 1.6
+}
