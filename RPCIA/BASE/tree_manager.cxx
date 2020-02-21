@@ -24,7 +24,15 @@ void TreeManager::add_class_name(TTree& tree, const char* pattern, const char* c
     }
 }
 
-bool TreeManager::make_branch(TTree& tree, 
+Bool_t TreeManager::make_branch(TTree& tree, const char* branch_name, const char* store_class_name, 
+                                Int_t *int_object, int buffer_size, int split_level) const
+{
+    add_class_name(tree, branch_name, store_class_name);
+    TBranch *branch = tree.Branch(branch_name, int_object, buffer_size, split_level);
+    return (branch != nullptr);
+}
+
+Bool_t TreeManager::make_branch(TTree& tree, 
                               const char* store_class_name,
                               const char* branch_class_name,
                               const char* branch_name, 
@@ -45,7 +53,7 @@ Bool_t TreeManager::make_branch(TTree& tree, const char* branch_name, const char
 
 // template Bool_t TreeManager::make_branch<Digit>(TTree&, const char*, const char*, std::vector<Digit>, int, int) const;
 
-bool TreeManager::set_address(TTree& tree, const char* branchName, 
+Bool_t TreeManager::set_address(TTree& tree, const char* branchName, 
                                     void* address) const {
     TBranch* branch = tree.GetBranch(branchName);
     if (branch) {

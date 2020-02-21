@@ -14,7 +14,7 @@ DigitMaker::~DigitMaker() {
 
 int DigitMaker::raw_to_digits(RawReader *raw_reader, DigitStore *digit_store) {
     if (!digit_store) {
-        return 0;
+        return -1;
     }
     
     digit_store_ = digit_store;
@@ -33,14 +33,17 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, DigitStore *digit_store) {
     Int_t felix_counter;
 
     int new_digit_count = 0;
-    while (raw_stream_->next(tdc, channel, width, bcid_tdc, 
-                             fine_time, trigger_id, bcid_fpga, 
-                             felix_counter)) {
+    bool is_more = false;
+    do 
+    {
+        is_more = raw_stream_->next(tdc, channel, width, bcid_tdc, 
+                                    fine_time, trigger_id, bcid_fpga, 
+                                    felix_counter);
         Int_t strip = TDCStripMap::get_strip(channel);
         Digit digit(trigger_id, bcid_fpga, felix_counter, tdc, 
                     channel, strip, width, bcid_tdc, fine_time);
         digit_store_->add(digit);
         new_digit_count++;
-    }
+    } while (is_more);
     return new_digit_count;
 }

@@ -11,6 +11,7 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE)
 
 # Set sources in alphabetical order
 set(SRCS
+    packet_buffer.cxx
     packet.cxx
     raw_decoder.cxx
     raw_reader.cxx

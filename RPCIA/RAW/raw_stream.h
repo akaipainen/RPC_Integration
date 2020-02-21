@@ -1,17 +1,15 @@
 #if !defined(RAW_STREAM_H)
 #define RAW_STREAM_H
 
-// #include "packet_buffer.h"
-
-
 #include "packet.h"
 #include "raw_reader.h"
 #include "raw_decoder.h"
+#include "packet_buffer.h"
 
 // Handles the raw reading of data from .dat files
 class RawStream {
 private:
-    // PacketBuffer pb_;
+    PacketBuffer pb_;
 
     RawReader *raw_reader_;
     // RawDecoder *raw_decoder_;
@@ -42,7 +40,7 @@ public:
               int &felix_counter);
 
 private:
-    void compile_next_digits();
+    void fill_buffer();
 };
 
 #endif // RAW_STREAM_H

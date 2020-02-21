@@ -15,7 +15,8 @@
 class DigitStore : public TObject {
 private:
     std::vector<Digit> *digits_;
-    Int_t num_digits_;
+    Int_t *num_digits_;
+    Int_t *trigger_id_;
     
 public:
     DigitStore();

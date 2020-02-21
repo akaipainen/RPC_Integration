@@ -14,6 +14,9 @@ public:
 
     void add_class_name(TTree& tree, const char* pattern, const char* class_name) const;
 
+    Bool_t make_branch(TTree& tree, const char* branch_name, const char* store_class_name, 
+                       Int_t *int_object, int buffer_size = 4000, int split_level = 99) const;
+
     Bool_t make_branch(TTree& tree, const char* storeClassName,
                       const char* branchClassName, const char* branchName, 
                       void *address, int bufferSize = 4000, int splitLevel = 99) const;
