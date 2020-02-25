@@ -10,7 +10,10 @@ Tracker::~Tracker()
 
 void Tracker::find_tracks(Store<Cluster> *cluster_store, Store<Track> *track_store) const
 {
-
+    for (auto tit = track_store->begin(); tit != track_store->end(); tit++)
+    {
+        
+    }
 }
 
 void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_store) const
