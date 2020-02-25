@@ -16,6 +16,7 @@ public:
 
     void find_tracks(Store<Cluster> *cluster_store, Store<Track> *track_store) const;
     void find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_store) const;
+    void set_muon_digits(Store<Track> *track_store);
 
 private:
     // Returns whether two clusters should form a segment

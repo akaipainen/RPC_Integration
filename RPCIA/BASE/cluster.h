@@ -14,7 +14,7 @@ private:
     Int_t unique_id_;
     static Int_t id_counter_;
 
-    std::vector<Digit> digits_;
+    std::vector<Digit *> digits_;
     Int_t size_;
     
     Int_t num_tdcs_;
@@ -34,16 +34,16 @@ public:
     Int_t trigger_id() const;
 
     // Add a digit to the cluster
-    void add_digit(const Digit &digit);
+    void add_digit(Digit *digit);
 
     // Get the total number of digits
     Int_t num_digits();
 
     // Get begin iterator for digits
-    std::vector<Digit>::const_iterator digits_begin() const;
+    std::vector<Digit*>::const_iterator digits_begin() const;
 
     // Get end iterator for digits
-    std::vector<Digit>::const_iterator digits_end() const;
+    std::vector<Digit*>::const_iterator digits_end() const;
 
     // Calculate the position of the cluster
     void init();

@@ -20,15 +20,15 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
 {
     track_store->clear();
     // Find segments
-    for (auto cit = cluster_store->begin(); cit != cluster_store->end(); cit++)
+    for (auto cpit = cluster_store->begin(); cpit != cluster_store->end(); cpit++)
     {
-        for (auto testit = next(cit); testit != cluster_store->end(); testit++)
+        for (auto testpit = next(cpit); testpit != cluster_store->end(); testpit++)
         {
-            if (should_segment(*cit, *testit))
+            if (should_segment(**cpit, **testpit))
             {
                 Track track;
-                track.add(*cit);
-                track.add(*testit);
+                track.add(*cpit);
+                track.add(*testpit);
                 track.init();
                 track_store->add(track);
             }
@@ -36,14 +36,28 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
     }
 
     // Combine segments
-    for (auto tit = track_store->begin(); tit != track_store->end(); tit++)
+    for (auto tpit = track_store->begin(); tpit != track_store->end(); tpit++)
     {
-        for (auto testit = next(tit); testit != track_store->end(); testit++)
+        for (auto testpit = next(tpit); testpit != track_store->end(); testpit++)
         {
-            if (should_combine_segments(*tit, *testit))
+            if (should_combine_segments(**tpit, **testpit))
             {
-                tit->merge(*testit);
-                track_store->remove(testit--);
+                (*tpit)->merge(**testpit);
+                track_store->remove(testpit--);
+            }
+        }
+    }
+}
+
+void Tracker::set_muon_digits(Store<Track> *track_store)
+{
+    for (auto tpit = track_store->begin(); tpit != track_store->end(); tpit++)
+    {
+        for (auto cpit = (*tpit)->begin_clusters(); cpit != (*tpit)->end_clusters(); cpit++)
+        {
+            for (auto dpit = (*cpit)->digits_begin(); dpit != (*cpit)->digits_end(); dpit++)
+            {
+                (*dpit)->set_muon(true);
             }
         }
     }

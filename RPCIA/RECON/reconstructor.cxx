@@ -64,6 +64,9 @@ void Reconstructor::run()
             // complete track_store_
             // complete cluster_store_
 
+        // Set the muon digits
+        tracker_->set_muon_digits(track_store_);
+
         tree_->Fill();
     }
     

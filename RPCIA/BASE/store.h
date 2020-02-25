@@ -12,7 +12,7 @@ template <class T>
 class Store 
 {
 private:
-    std::vector<T> *objects_;
+    std::vector<T *> *objects_;
     Int_t *num_objects_;
     Int_t *trigger_id_;
 
@@ -33,19 +33,19 @@ public:
     void clear();
 
     // Begin iterator to loop over all objects
-    typename std::vector<T>::const_iterator begin() const;
+    typename std::vector<T *>::const_iterator cbegin() const;
 
     // End iterator to loop over all objects
-    typename std::vector<T>::const_iterator end() const;
+    typename std::vector<T *>::const_iterator cend() const;
 
     // Begin non const iterator
-    typename std::vector<T>::iterator begin();
+    typename std::vector<T *>::iterator begin();
 
     // End non const iterator
-    typename std::vector<T>::iterator end();
+    typename std::vector<T *>::iterator end();
 
     // Remove an object from the store
-    void remove(typename std::vector<T>::iterator it);
+    void remove(typename std::vector<T *>::iterator it);
 
     // Get the number of objects stored
     Int_t size() const;

@@ -14,6 +14,7 @@ Digit::Digit()
  , width_(0)
  , bcid_tdc_(0)
  , fine_time_(0)
+ , muon_(false)
 {
 }
 
@@ -34,6 +35,7 @@ Digit::Digit(Int_t trigger_id,
  , width_(width)
  , bcid_tdc_(bcid_tdc)
  , fine_time_(fine_time)
+ , muon_(false)
 {
 	strip_ = TDC::channel_to_strip(channel_);
 	direction_ = Detector::tdc_direction(tdc_);
@@ -50,3 +52,7 @@ Bool_t Digit::direction() const { return direction_; }
 Int_t Digit::width() const { return width_; }
 Int_t Digit::bcid_tdc() const { return bcid_tdc_; }
 Int_t Digit::fine_time() const { return fine_time_; }
+
+Bool_t Digit::muon() const { return muon_; }
+
+void Digit::set_muon(Bool_t value) { muon_ = value; }

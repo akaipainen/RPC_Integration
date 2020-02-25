@@ -6,7 +6,7 @@
 
 template <class T>
 Store<T>::Store()
- : objects_(new std::vector<T>())
+ : objects_(new std::vector<T *>())
  , num_objects_(new Int_t(0))
  , trigger_id_(new Int_t(0))
 {
@@ -47,7 +47,7 @@ Bool_t Store<T>::connect(TTree &tree) const
 template <class T>
 Bool_t Store<T>::add(const TObject &object)
 {
-    const T *obj = dynamic_cast<const T *>(&object);
+    const T *obj = dynamic_cast<const T*>(&object);
     if (obj)
     {
         return add(*obj);
@@ -58,7 +58,8 @@ Bool_t Store<T>::add(const TObject &object)
 template <class T>
 Bool_t Store<T>::add(const T &object)
 {
-    objects_->push_back(T(object));
+    objects_->push_back(new T(object));
+    // objects_->back()->AddDirectory(0);
     *trigger_id_ = object.trigger_id();
     (*num_objects_)++;
     return kTRUE;
@@ -67,38 +68,42 @@ Bool_t Store<T>::add(const T &object)
 template <class T>
 void Store<T>::clear()
 {
+    for (auto &obj : *objects_)
+    {
+        delete obj;
+    }
     objects_->clear();
     *num_objects_ = 0;
-    // *trigger_id_ = -1;
 }
 
 template <class T>
-typename std::vector<T>::const_iterator Store<T>::begin() const
+typename std::vector<T *>::const_iterator Store<T>::cbegin() const
+{
+    return objects_->cbegin();
+}
+
+template <class T>
+typename std::vector<T *>::const_iterator Store<T>::cend() const
+{
+    return objects_->cend();
+}
+
+template <class T>
+typename std::vector<T *>::iterator Store<T>::begin()
 {
     return objects_->begin();
 }
 
 template <class T>
-typename std::vector<T>::const_iterator Store<T>::end() const
+typename std::vector<T *>::iterator Store<T>::end()
 {
     return objects_->end();
 }
 
 template <class T>
-typename std::vector<T>::iterator Store<T>::begin()
+void Store<T>::remove(typename std::vector<T *>::iterator it)
 {
-    return objects_->begin();
-}
-
-template <class T>
-typename std::vector<T>::iterator Store<T>::end()
-{
-    return objects_->end();
-}
-
-template <class T>
-void Store<T>::remove(typename std::vector<T>::iterator it)
-{
+    delete *it;
     objects_->erase(it);
     *num_objects_ -= 1;
 }

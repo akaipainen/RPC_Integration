@@ -18,7 +18,11 @@ Track::Track()
 
 Int_t Track::trigger_id() const
 {
-    return clusters_[0].trigger_id();
+    if (!clusters_.empty())
+    {
+        return clusters_[0]->trigger_id();
+    }
+    return -1;
 }
 
 Int_t Track::direction() const
@@ -30,9 +34,8 @@ Int_t Track::direction() const
     return direction_;
 }
 
-void Track::add(const Cluster &cluster)
+void Track::add(Cluster *cluster)
 {
-
     for (auto &c : clusters_)
     {
         if (cluster == c) {
@@ -40,7 +43,7 @@ void Track::add(const Cluster &cluster)
         }
     }
     
-    bool cluster_dir = cluster.digits_begin()->direction();
+    bool cluster_dir = (*cluster->digits_begin())->direction();
     if (!clusters_.empty() && cluster_dir != direction_)
     {
         two_coords_ = true;
@@ -54,8 +57,8 @@ void Track::add(const Cluster &cluster)
     num_clusters_++;
     has_plane_ = false;
     
-    data_x_.push_back(cluster.position()[2]);
-    data_z_.push_back(cluster.position()[direction_]);
+    data_x_.push_back(cluster->position()[2]);
+    data_z_.push_back(cluster->position()[direction_]);
 }
 
 void Track::init()
@@ -73,6 +76,17 @@ void Track::init()
     delete lf;
     has_plane_ = true;
 }
+
+std::vector<Cluster*>::iterator Track::begin_clusters()
+{
+    return clusters_.begin();
+}
+
+std::vector<Cluster*>::iterator Track::end_clusters()
+{
+    return clusters_.end();
+}
+
 
 TVector3 Track::plane() const
 {

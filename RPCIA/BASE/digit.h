@@ -18,6 +18,8 @@ private:
     Int_t bcid_tdc_;
 	Int_t fine_time_;
 
+    Bool_t muon_;
+
 public:
     Digit();
 
@@ -37,6 +39,10 @@ public:
     Int_t width() const;
     Int_t bcid_tdc() const;
     Int_t fine_time() const;
+    
+    Bool_t muon() const;
+
+    void set_muon(Bool_t value);
 
 private:
     ClassDef(Digit, 2); // Digit structure
