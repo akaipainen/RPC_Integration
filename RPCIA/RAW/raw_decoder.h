@@ -63,7 +63,7 @@ public:
     static unsigned long decode_bcid_fpga(const Packet &packet);
 
 private:
-    RawDecoder() : id_counter_(256) { }
+    RawDecoder() : id_counter_(256) {}
 
     void set_pair_mode_imp(bool value);
     void set_trigger_mode_imp(bool value);

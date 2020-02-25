@@ -19,21 +19,21 @@ Packet::Packet(const char *packet_data)
     // std::cout << raw_data_ << std::endl;
 }
 
-Packet::Packet(const Packet &rhs)
- : size_(rhs.size_)
+Packet::Packet(const Packet &other)
+ : size_(other.size_)
 {
     raw_data_ = new char[size_ + 1];
-    strcpy(raw_data_, rhs.raw_data_);
+    strcpy(raw_data_, other.raw_data_);
 }
 
-Packet::Packet(Packet &&rhs)
+Packet::Packet(Packet &&other)
  : raw_data_(nullptr), size_(0)
 {
-    size_ = rhs.size_;
-    raw_data_ = rhs.raw_data_;
+    size_ = other.size_;
+    raw_data_ = other.raw_data_;
 
-    rhs.raw_data_ = nullptr;
-    rhs.size_ = 0;
+    other.raw_data_ = nullptr;
+    other.size_ = 0;
 }
 
 Packet::~Packet()
@@ -41,7 +41,7 @@ Packet::~Packet()
     delete[] raw_data_;
 }
 
-Packet & Packet::operator=(const Packet & rhs)
+Packet & Packet::operator=(const Packet &rhs)
 {
     if (this != &rhs)
     {

@@ -31,7 +31,9 @@ void PacketBuffer::insert(const Packet &packet)
     }
     else
     {
-        buffer_.insert(it, std::list<Packet>{packet});
+        std::list<Packet> new_trigger;
+        new_trigger.push_back(packet);
+        buffer_.insert(it, new_trigger);
     }
 }
 

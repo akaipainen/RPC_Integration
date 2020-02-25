@@ -4,7 +4,6 @@
 
 RawStream::RawStream() : trigger_(true), current_word_index_(0) {
     RawDecoder::set_trigger_mode(trigger_);
-    RawDecoder::set_pair_mode(true);
 }
 
 RawStream::~RawStream() {
@@ -42,13 +41,13 @@ bool RawStream::next(int &tdc,
                        trigger_id,
                        bcid_fpga);
 
-    std::cout << current_word_index_ <<
-          " " << packet.num_datawords() <<
-          " " << packet.size() <<
-          " " << tdc <<
-          " " << channel <<
-          " " << width <<
-          " " << packet.dataword(current_word_index_) << '\n';
+    // std::cout << current_word_index_ <<
+    //       " " << packet.num_datawords() <<
+    //       " " << packet.size() <<
+    //       " " << tdc <<
+    //       " " << channel <<
+    //       " " << width <<
+    //       " " << packet.dataword(current_word_index_) << '\n';
     
     if (++current_word_index_ < packet.num_datawords()) 
     {

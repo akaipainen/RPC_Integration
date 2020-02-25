@@ -13,8 +13,10 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE
 
 # Set sources in alphabetical order
 set(SRCS
+    cluster_finder.cxx
     digit_maker.cxx
-    digit_store.cxx
+    reconstructor.cxx
+    tracker.cxx
     )
 
 # Headers from sources
@@ -28,7 +30,7 @@ get_directory_property(incdirs INCLUDE_DIRECTORIES)
 generate_dictionary("${MODULE}" "${MODULE}LinkDef.h" "${HDRS}" "${incdirs}")
 
 # Generate the ROOT map
-set(LIBDEPS BASE MAPPING RAW)
+set(LIBDEPS BASE MAPPING RAW Minuit)
 generate_rootmap("${MODULE}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}LinkDef.h")
 
 # Create object to be used in case of static libraries

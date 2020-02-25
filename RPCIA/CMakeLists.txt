@@ -139,7 +139,7 @@ else()
 endif()
 unset(isSystemDir)
 
-add_subdirectory(3rdParty)
+# add_subdirectory(3rdParty)
 add_subdirectory(BASE)
 add_subdirectory(MAPPING)
 add_subdirectory(RECON)

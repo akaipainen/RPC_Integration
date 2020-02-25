@@ -10,7 +10,9 @@ include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 
 # Set sources in alphabetical order
 set(SRCS
-    tdc_strip_map.cxx
+    chamber.cxx
+    detector.cxx
+    tdc.cxx
     )
 
 # Headers from sources

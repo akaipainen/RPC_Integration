@@ -1,53 +1,61 @@
 #if !defined(STORE_H)
 #define STORE_H
 
-class TTree;
-class TObject;
-class TIterator;
+#include <vector>
 
-class Store : public TObject {
+#include <TTree.h>
+#include <TObject.h>
+#include <TIterator.h>
+#include <TString.h>
+
+template <class T>
+class Store 
+{
+private:
+    std::vector<T> *objects_;
+    Int_t *num_objects_;
+    Int_t *trigger_id_;
+
 public:
     Store();
     ~Store();
 
-    // Add an item to the store
-    virtual Bool_t add(TObject *object) = 0;
-
-    // Clear contents
-    virtual void clear() = 0;
-
-    // Create an empty copy of this store
-    virtual Store * create() = 0;
-
-    // Create a store from a TTree
-    // static Store * create(TTree& tree, const char *what);
-
-    // Return an iterator to loop over the whole store
-    virtual TIterator * create_iterator() const = 0;
-    
-    // Whether the connect(TTree&) method is implemented
-    // virtual bool can_connect() const = 0;
-    
     // Connect this store to a TTree
-    virtual Bool_t connect(TTree& tree, Bool_t alone=true) const;
+    Bool_t connect(TTree &tree) const;
 
-    // Find an object by name
-    // virtual TObject * find_object(const char *name) const;
-    
-    // Find an object
-    // virtual TObject * find_object(const TObject* object) const;
+    // Add a TObject to the store, if it can be downcast
+    Bool_t add(const TObject &object);
 
-    // Find an object using a single id
-    // virtual TObject * find_object(int unique_id) const;
-        
-    // The number of objects stored
-    virtual Int_t size() const = 0;
+    // Add an Obj to the store
+    Bool_t add(const T &obj);
+
+    // Clear all objects from store
+    void clear();
+
+    // Begin iterator to loop over all objects
+    typename std::vector<T>::const_iterator begin() const;
+
+    // End iterator to loop over all objects
+    typename std::vector<T>::const_iterator end() const;
+
+    // Begin non const iterator
+    typename std::vector<T>::iterator begin();
+
+    // End non const iterator
+    typename std::vector<T>::iterator end();
+
+    // Remove an object from the store
+    void remove(typename std::vector<T>::iterator it);
+
+    // Get the number of objects stored
+    Int_t size() const;
 
     // Whether the store is empty or not
-    virtual Bool_t empty() const { return size() == 0; }
+    Bool_t empty() const;
 
 private:
-    ClassDef(Store, 1);
+    // Get the branch name of the store's objects
+    TString get_branch_name() const;
 };
 
 #endif // STORE_H

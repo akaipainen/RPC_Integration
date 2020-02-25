@@ -1,41 +1,49 @@
 #if !defined(RECONSTRUCTOR_H)
 #define RECONSTRUCTOR_H
 
-class DigitMaker;
-class DigitStore;
-// class TriggerStore;
-// class TrackStore;
-// class ClusterStore;
-class RawReader;
-class TTree;
+#include <TTree.h>
+
+#include "digit_maker.h"
+#include "cluster_finder.h"
+#include "tracker.h"
+
+#include "store.h"
+#include "raw_reader.h"
+#include "raw_decoder.h"
+
+#include "digit.h"
+#include "cluster.h"
+#include "track.h"
 
 class Reconstructor {
 private:
+    RawReader *raw_reader_;
+    
     DigitMaker *digit_maker_;
+    ClusterFinder *cluster_finder_;
+    Tracker *tracker_;
 
-    DigitStore *digit_store_;
-    // TriggerStore *trigger_store_;
-    // TrackStore *track_store_;
-    // ClusterStore *cluster_store_;
+    Store<Digit> *digit_store_;
+    Store<Cluster> *cluster_store_;
+    Store<Track> *track_store_;
+
+    TTree *tree_;
 
 public:
     Reconstructor();
     ~Reconstructor();
 
-    // Convert raw data into digit
-    void convert_digits(RawReader *raw_reader, DigitStore *digit_store) const;
+    // Set input file
+    void set_input_file(const char *dat_file);
 
-    // Run reconstruction
-    void reconstruct(RawReader *raw_reader, TTree *digits_tree) const;
+    // Set pair mode
+    void set_pair_mode(const bool val);
 
-    // Write the digit and cluster information to Tree
-    void fill_tree(DigitStore *digit_store, TTree &digits_tree) const;
+    // Set TTree to output to
+    void set_tree(TTree &tree);
 
-private:
-    DigitStore * get_digit_store();
-    DigitStore * get_trigger_store();
-
-    void create_digit_maker();
+    // Run full reconstruction and save to tree
+    void run();
 
 };
 

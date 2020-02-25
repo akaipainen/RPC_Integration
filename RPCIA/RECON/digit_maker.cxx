@@ -3,7 +3,6 @@
 #include "raw_reader.h"
 #include "raw_stream.h"
 #include "tdc_strip_map.h"
-#include "digit.h"
 
 DigitMaker::DigitMaker() {
     raw_stream_ = new RawStream();
@@ -12,7 +11,7 @@ DigitMaker::~DigitMaker() {
     delete raw_stream_;
 }
 
-int DigitMaker::raw_to_digits(RawReader *raw_reader, DigitStore *digit_store) {
+int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store) {
     if (!digit_store) {
         return -1;
     }
@@ -39,9 +38,8 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, DigitStore *digit_store) {
         is_more = raw_stream_->next(tdc, channel, width, bcid_tdc, 
                                     fine_time, trigger_id, bcid_fpga, 
                                     felix_counter);
-        Int_t strip = TDCStripMap::get_strip(channel);
         Digit digit(trigger_id, bcid_fpga, felix_counter, tdc, 
-                    channel, strip, width, bcid_tdc, fine_time);
+                    channel, width, bcid_tdc, fine_time);
         digit_store_->add(digit);
         new_digit_count++;
     } while (is_more);

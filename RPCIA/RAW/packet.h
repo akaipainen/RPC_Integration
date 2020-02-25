@@ -12,10 +12,10 @@ private:
 public:
     Packet(); // default ctor
     Packet(const char *packet_data);  // ctor
-    Packet(const Packet &rhs); // copy ctor
-    Packet(Packet &&rhs); // move ctor
+    Packet(const Packet &other); // copy ctor
+    Packet(Packet &&other); // move ctor
     ~Packet(); // dtor
-    Packet & operator=(const Packet & rhs); // copy assign
+    Packet & operator=(const Packet &rhs); // copy assign
     Packet & operator=(Packet && rhs); // move assign
 
     // Get the size of the raw data packet

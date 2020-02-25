@@ -7,14 +7,17 @@ include_directories(${RpcIA_SOURCE_DIR}/${MODULE})
 
 # Additional include folders in alphabetical order except ROOT
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
+include_directories(${RpcIA_SOURCE_DIR}/MAPPING)
 
 # Set sources in alphabetical order
 set(SRCS
+    cluster.cxx
     digit.cxx
     loader.cxx
     noisy_rollover_counter.cxx
     object_pair.cxx
-    tree_manager.cxx
+    store.cxx
+    track.cxx
     )
 
 # Headers from sources
