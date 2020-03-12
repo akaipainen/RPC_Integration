@@ -7,7 +7,6 @@
 template <class T>
 Store<T>::Store()
  : objects_(new std::vector<T *>())
- , num_objects_(new Int_t(0))
  , trigger_id_(new Int_t(0))
 {
 }
@@ -17,16 +16,15 @@ Store<T>::~Store()
 {
     clear();
     delete objects_;
-    delete num_objects_;
     delete trigger_id_;
 }
 
 template <class T>
-Bool_t Store<T>::connect(TTree &tree) const
+Bool_t Store<T>::connect(TTree &tree)
 {
     TString name = get_branch_name();
 
-    TBranch * branch = tree.GetBranch(name);
+    TBranch *branch = tree.GetBranch(name);
     Bool_t is_making = (branch == 0);
     if (is_making)
     {
@@ -35,11 +33,8 @@ Bool_t Store<T>::connect(TTree &tree) const
     }
     else
     {
-        TBranch *branch = tree.GetBranch(name);
-        if (branch)
-        {
-            branch->SetAddress(objects_);
-        }
+        tree.SetBranchAddress(name, &objects_);
+        // branch->SetAddress(objects_);
         return kFALSE;
     }
 }
@@ -61,7 +56,6 @@ Bool_t Store<T>::add(const T &object)
     objects_->push_back(new T(object));
     // objects_->back()->AddDirectory(0);
     *trigger_id_ = object.trigger_id();
-    (*num_objects_)++;
     return kTRUE;
 }
 
@@ -73,7 +67,6 @@ void Store<T>::clear()
         delete obj;
     }
     objects_->clear();
-    *num_objects_ = 0;
 }
 
 template <class T>
@@ -105,7 +98,6 @@ void Store<T>::remove(typename std::vector<T *>::iterator it)
 {
     delete *it;
     objects_->erase(it);
-    *num_objects_ -= 1;
 }
 
 template <class T>
@@ -115,6 +107,18 @@ TString Store<T>::get_branch_name() const
     name = name.Append("s");
     name.ToLower();
     return name;
+}
+
+template <class T>
+Int_t Store<T>::size() const
+{
+    return objects_->size();
+}
+
+template <class T>
+Bool_t Store<T>::empty() const
+{
+    return size() == 0;
 }
 
 template class Store<Digit>;

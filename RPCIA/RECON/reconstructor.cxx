@@ -34,7 +34,7 @@ void Reconstructor::set_input_file(const char *dat_file)
 
 void Reconstructor::set_pair_mode(const bool val)
 {
-    RawDecoder::set_pair_mode(false);
+    RawDecoder::set_pair_mode(val);
 }
 
 void Reconstructor::set_tree(TTree &tree)

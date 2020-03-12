@@ -43,6 +43,13 @@ message(STATUS "Build type: ${CMAKE_BUILD_TYPE} (${CMAKE_CXX_FLAGS_${CMAKE_BUILD
 if(CMAKE_INSTALL_PREFIX STREQUAL "${RpcIA_SOURCE_DIR}")
     message(FATAL_ERROR "Please choose a different installation point than the source tree.")
 endif(CMAKE_INSTALL_PREFIX STREQUAL "${RpcIA_SOURCE_DIR}")
+if(NOT CMAKE_INSTALL_PREFIX)
+    set(CMAKE_INSTALL_PREFIX "${RpcIA_SOURCE_DIR}/install")
+endif(NOT CMAKE_INSTALL_PREFIX)
+message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+
+set(LD_LIBRARY_PATH ${CMAKE_INSTALL_PREFIX}/lib:$ENV{LD_LIBRARY_PATH})
+
 
 # Path to additional modules
 set(CMAKE_MODULE_PATH "${RpcIA_SOURCE_DIR}/cmake")
@@ -144,4 +151,6 @@ add_subdirectory(BASE)
 add_subdirectory(MAPPING)
 add_subdirectory(RECON)
 add_subdirectory(RAW)
+add_subdirectory(ANALYSIS)
+add_subdirectory(TASK)
 add_subdirectory(executables)

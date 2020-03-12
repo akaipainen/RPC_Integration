@@ -17,6 +17,10 @@
 
 #include "loader.h"
 #include "reconstructor.h"
+#include "analysis_manager.h"
+
+#include "simple_task.h"
+#include "isolate_noise.h"
 
 #include <TTree.h>
 
@@ -29,14 +33,20 @@ void print_help() {
 
 int main(int argc, char *argv[]) {
     Loader *loader = new Loader();
-    loader->open("official_.root");
-    TTree *tree = loader->get_tree_loader();
+    loader->open("official_leading.root");
+    TTree *tree = new TTree("tree", "Tree info");
 
     Reconstructor rec;
     rec.set_input_file(argv[1]);
     rec.set_pair_mode(false);
     rec.set_tree(*tree);
     rec.run();
+
+    AnalysisManager mgr;
+    mgr.init(tree);
+    mgr.add_task(new SimpleTask());
+    mgr.add_task(new IsolateNoise());
+    mgr.run();
 
     loader->write();
 

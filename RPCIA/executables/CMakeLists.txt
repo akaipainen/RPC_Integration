@@ -9,6 +9,6 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE
 
 # Main executable
 add_executable(gen_tree generate_tree.cxx)
-target_link_libraries(gen_tree RECON RAW BASE MAPPING Core Tree Hist RIO Physics)
+target_link_libraries(gen_tree TASK RECON RAW BASE MAPPING Core Tree Hist RIO Physics)
 
 install(TARGETS gen_tree RUNTIME DESTINATION bin)

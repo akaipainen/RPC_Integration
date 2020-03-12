@@ -18,7 +18,7 @@ TDC::TDC()
     };
 
     bcid_resolution_ns = 25;
-    fine_time_resolution_ns = 0.1953125;
+    fine_time_resolution_ns = 0.1953125; // 25ns / 2^7 precision of TDC
 }
 
 TDC::~TDC()

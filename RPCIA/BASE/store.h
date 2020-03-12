@@ -13,7 +13,6 @@ class Store
 {
 private:
     std::vector<T *> *objects_;
-    Int_t *num_objects_;
     Int_t *trigger_id_;
 
 public:
@@ -21,7 +20,7 @@ public:
     ~Store();
 
     // Connect this store to a TTree
-    Bool_t connect(TTree &tree) const;
+    Bool_t connect(TTree &tree);
 
     // Add a TObject to the store, if it can be downcast
     Bool_t add(const TObject &object);
