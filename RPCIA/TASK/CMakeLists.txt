@@ -14,8 +14,7 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE
 
 # Set sources in alphabetical order
 set(SRCS
-    isolate_noise.cxx
-    simple_task.cxx
+    extra_hits_on_strip.cxx
     time_difference_from_average.cxx
     time_difference_vs_distance.cxx
     )

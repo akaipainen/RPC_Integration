@@ -22,7 +22,7 @@
 #include "simple_task.h"
 #include "time_difference_from_average.h"
 #include "time_difference_vs_distance.h"
-#include "isolate_noise.h"
+#include "extra_hits_on_strip.h"
 
 #include <TTree.h>
 
@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
     // mgr.add_task(new SimpleTask());
     mgr.add_task(new TimeDifferenceFromAverage());
     mgr.add_task(new TimeDifferenceVsDistance());
+    mgr.add_task(new ExtraHitsOnStrip());
     // mgr.add_task(new IsolateNoise());
     mgr.run();
 
