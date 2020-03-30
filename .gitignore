@@ -4,5 +4,5 @@ install/
 .DS_STORE
 /macros
 
-.root
-.pdf
+*.root
+*.pdf
