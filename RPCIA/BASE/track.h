@@ -6,6 +6,8 @@
 #include <TVector3.h>
 
 #include "cluster.h"
+#include "store.h"
+#include "iterator.h"
 
 class Track : public TObject
 {
@@ -13,7 +15,7 @@ private:
     Int_t unique_id_;
     static Int_t id_counter_;
 
-    std::vector<Cluster *> clusters_;
+    Store<Cluster> clusters_;
     Int_t num_clusters_;
 
     std::vector<Double_t> data_x_; // one dimension of data
@@ -43,10 +45,10 @@ public:
     void init();
 
     // Get the start iterator to clusters
-    std::vector<Cluster*>::iterator begin_clusters();
+    Iterator<Cluster> begin_clusters();
 
     // Get the end iterator to clusters
-    std::vector<Cluster*>::iterator end_clusters();
+    Iterator<Cluster> end_clusters();
     
     // Get the plane this pretrack is in
     TVector3 plane() const;

@@ -32,9 +32,8 @@ IsolateNoise::~IsolateNoise()
 
 void IsolateNoise::execute()
 { 
-    for (auto dpit = digit_store_->begin(); dpit != digit_store_->end(); dpit++)
+    for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
     {
-        auto dit = *dpit;
         widths[0]->Fill(dit->width(), dit->tdc() == 5);
         widths[1]->Fill(dit->width(), dit->tdc() == 7);
     }

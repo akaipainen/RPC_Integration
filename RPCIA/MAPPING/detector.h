@@ -34,6 +34,9 @@ public:
     // Get the direction of the tdc
     static bool tdc_direction(int tdc);
 
+    // Get the layer of the tdc
+    static int tdc_layer(int tdc);
+
     // Get the absolute position of the tdc/strip
     static TVector3 position(int tdc, int strip);
 
@@ -44,6 +47,7 @@ private:
     bool strip_adjacent_imp(int tdc1, int strip1, int tdc2, int strip2) const;
     bool parallel_imp(int tdc1, int tdc2) const;
     bool tdc_direction_imp(int tdc) const;
+    int tdc_layer_imp(int tdc) const;
     TVector3 position_imp(int tdc, int strip) const;
     
     // Add a tdc/chamber combination

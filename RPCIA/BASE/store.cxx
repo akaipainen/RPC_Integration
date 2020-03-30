@@ -5,9 +5,10 @@
 #include "track.h"
 
 template <class T>
-Store<T>::Store()
+Store<T>::Store(Bool_t master)
  : objects_(new std::vector<T *>())
- , trigger_id_(new Int_t(0))
+ , trigger_id_(0)
+ , master_(master)
 {
 }
 
@@ -16,7 +17,28 @@ Store<T>::~Store()
 {
     clear();
     delete objects_;
-    delete trigger_id_;
+}
+
+template <class T>
+Store<T>::Store(Store &other)
+ : objects_(new std::vector<T *>())
+ , trigger_id_(other.trigger_id_)
+ , master_(false)
+{
+    if (master_)
+    {
+        std::copy(other.objects_->begin(), other.objects_->end(), objects_->begin());
+    }
+    else
+    {
+        *objects_ = *other.objects_;
+    }
+}
+
+template <class T>
+Int_t Store<T>::trigger_id() const
+{
+    return trigger_id_;
 }
 
 template <class T>
@@ -39,74 +61,77 @@ Bool_t Store<T>::connect(TTree &tree)
     }
 }
 
-template <class T>
-Bool_t Store<T>::add(const TObject &object)
-{
-    const T *obj = dynamic_cast<const T*>(&object);
-    if (obj)
-    {
-        return add(*obj);
-    }
-    return kFALSE;
-}
+// template <class T>
+// Bool_t Store<T>::add(const TObject &object)
+// {
+//     const T *obj = dynamic_cast<const T*>(&object);
+//     if (obj)
+//     {
+//         return add(*obj);
+//     }
+//     return kFALSE;
+// }
 
 template <class T>
-Bool_t Store<T>::add(const T &object)
+Bool_t Store<T>::add(T &object)
 {
-    objects_->push_back(new T(object));
-    // objects_->back()->AddDirectory(0);
-    *trigger_id_ = object.trigger_id();
+    if (master_) // master
+    {
+        T * temp = new T(object);
+        objects_->push_back(temp);
+    }
+    else // slave
+    {
+        objects_->push_back(&object);
+    }
+    trigger_id_ = object.trigger_id();
     return kTRUE;
 }
 
 template <class T>
 void Store<T>::clear()
 {
-    for (auto &obj : *objects_)
+    // Only delete objects if this is the master
+    if (master_)
     {
-        delete obj;
+        for (auto &obj : *objects_)
+        {
+            delete obj;
+        }   
+        objects_->clear();
     }
-    objects_->clear();
+}
+
+// template <class T>
+// Iterator<T> Store<T>::begin() const
+// {
+//     return Iterator<T>(objects_->cbegin());
+// }
+
+// template <class T>
+// Iterator<T> Store<T>::end() const
+// {
+//     return Iterator<T>(objects_->cend());
+// }
+
+template <class T>
+Iterator<T> Store<T>::begin() const
+{
+    return Iterator<T>(objects_->begin());
 }
 
 template <class T>
-typename std::vector<T *>::const_iterator Store<T>::cbegin() const
+Iterator<T> Store<T>::end() const
 {
-    return objects_->cbegin();
+    return Iterator<T>(objects_->end());
 }
 
 template <class T>
-typename std::vector<T *>::const_iterator Store<T>::cend() const
+void Store<T>::remove(Iterator<T> it)
 {
-    return objects_->cend();
-}
-
-template <class T>
-typename std::vector<T *>::iterator Store<T>::begin()
-{
-    return objects_->begin();
-}
-
-template <class T>
-typename std::vector<T *>::iterator Store<T>::end()
-{
-    return objects_->end();
-}
-
-template <class T>
-void Store<T>::remove(typename std::vector<T *>::iterator it)
-{
-    delete *it;
-    objects_->erase(it);
-}
-
-template <class T>
-TString Store<T>::get_branch_name() const
-{
-    TString name(T().ClassName());
-    name = name.Append("s");
-    name.ToLower();
-    return name;
+    typename std::vector<T *>::iterator pit = it;
+    delete *pit;
+    objects_->erase(pit);
 }
 
 template <class T>
@@ -119,6 +144,15 @@ template <class T>
 Bool_t Store<T>::empty() const
 {
     return size() == 0;
+}
+
+template <class T>
+TString Store<T>::get_branch_name() const
+{
+    TString name(T().ClassName());
+    name = name.Append("s");
+    name.ToLower();
+    return name;
 }
 
 template class Store<Digit>;

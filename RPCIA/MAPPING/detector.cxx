@@ -20,7 +20,6 @@ Detector::~Detector()
     {
         delete chamber;
     }
-    
 }
 
 Detector & Detector::get()
@@ -50,6 +49,11 @@ bool Detector::tdc_direction_imp(int tdc) const
     return tdc_to_chamber_.at(tdc)->eta_direction();
 }
 
+int Detector::tdc_layer_imp(int tdc) const
+{
+    return tdc_to_chamber_.at(tdc)->layer();
+}
+
 TVector3 Detector::position_imp(int tdc, int strip) const
 {
     TVector3 vec;
@@ -75,6 +79,11 @@ bool Detector::parallel(int tdc1, int tdc2)
 bool Detector::tdc_direction(int tdc)
 {
     return Detector::get().tdc_direction_imp(tdc);
+}
+
+int Detector::tdc_layer(int tdc)
+{
+    return Detector::get().tdc_layer_imp(tdc);
 }
 
 TVector3 Detector::position(int tdc, int strip)

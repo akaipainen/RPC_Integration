@@ -16,6 +16,8 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE
 set(SRCS
     isolate_noise.cxx
     simple_task.cxx
+    time_difference_from_average.cxx
+    time_difference_vs_distance.cxx
     )
 
 # Headers from sources
@@ -29,7 +31,7 @@ get_directory_property(incdirs INCLUDE_DIRECTORIES)
 generate_dictionary("${MODULE}" "${MODULE}LinkDef.h" "${HDRS}" "${incdirs}")
 
 # Generate the ROOT map
-set(LIBDEPS BASE MAPPING ANALYSIS Hist)
+set(LIBDEPS BASE MAPPING ANALYSIS Hist Gpad)
 generate_rootmap("${MODULE}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}LinkDef.h")
 
 # Create object to be used in case of static libraries

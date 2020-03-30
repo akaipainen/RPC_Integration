@@ -7,7 +7,8 @@ include_directories(${RpcIA_SOURCE_DIR}/${MODULE})
 
 # Additional include folders in alphabetical order except ROOT
 include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
-include_directories(${RpcIA_SOURCE_DIR}/BASE)
+include_directories(${RpcIA_SOURCE_DIR}/BASE
+                    ${RpcIA_SOURCE_DIR}/MAPPING)
 
 # Set sources in alphabetical order
 set(SRCS
@@ -26,7 +27,7 @@ get_directory_property(incdirs INCLUDE_DIRECTORIES)
 generate_dictionary("${MODULE}" "${MODULE}LinkDef.h" "${HDRS}" "${incdirs}")
 
 # Generate the ROOT map
-set(LIBDEPS BASE Tree RIO)
+set(LIBDEPS MAPPING BASE Tree RIO)
 generate_rootmap("${MODULE}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}LinkDef.h")
 
 # Create object to be used in case of static libraries

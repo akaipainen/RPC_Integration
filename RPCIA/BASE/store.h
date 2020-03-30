@@ -8,43 +8,50 @@
 #include <TIterator.h>
 #include <TString.h>
 
+#include "iterator.h"
+
 template <class T>
 class Store 
 {
 private:
     std::vector<T *> *objects_;
-    Int_t *trigger_id_;
+    Int_t trigger_id_;
+    Bool_t master_;
 
 public:
-    Store();
+    Store(Bool_t master=false);
     ~Store();
+    Store(Store &other);
+
+    // Get the trigger id
+    Int_t trigger_id() const;
 
     // Connect this store to a TTree
     Bool_t connect(TTree &tree);
 
     // Add a TObject to the store, if it can be downcast
-    Bool_t add(const TObject &object);
+    // Bool_t add(const TObject &object);
 
     // Add an Obj to the store
-    Bool_t add(const T &obj);
+    Bool_t add(T &obj);
 
-    // Clear all objects from store
+    // Clear and delete all objects from store
     void clear();
 
     // Begin iterator to loop over all objects
-    typename std::vector<T *>::const_iterator cbegin() const;
+    // Iterator<T> begin() const;
 
     // End iterator to loop over all objects
-    typename std::vector<T *>::const_iterator cend() const;
+    // Iterator<T> end() const;
 
     // Begin non const iterator
-    typename std::vector<T *>::iterator begin();
+    Iterator<T> begin() const;
 
     // End non const iterator
-    typename std::vector<T *>::iterator end();
+    Iterator<T> end() const;
 
     // Remove an object from the store
-    void remove(typename std::vector<T *>::iterator it);
+    void remove(Iterator<T> it);
 
     // Get the number of objects stored
     Int_t size() const;

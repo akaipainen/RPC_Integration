@@ -12,6 +12,7 @@ include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 set(SRCS
     chamber.cxx
     detector.cxx
+    strip.cxx
     tdc.cxx
     )
 

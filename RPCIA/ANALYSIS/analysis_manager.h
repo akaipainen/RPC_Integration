@@ -9,6 +9,7 @@
 #include "analysis_task.h"
 #include "loader.h"
 
+#include "strip.h"
 #include "store.h"
 #include "digit.h"
 #include "cluster.h"
@@ -32,9 +33,6 @@ public:
     // Initialize the AnalysisManager
     // Set the input tree
     void init(TTree *tree);
-
-    // Connect the loader
-    // void connect(Loader loader);
 
     // Add an analysis task
     void add_task(AnalysisTask *task);

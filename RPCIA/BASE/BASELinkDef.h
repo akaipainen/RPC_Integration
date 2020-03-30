@@ -14,6 +14,9 @@
 #pragma link C++ class vector<Track*>+;
 #pragma link C++ class vector<Track*>::iterator-;
 #pragma link C++ class vector<Track*>:const_iterator-;
+// #pragma link C++ class Iterator<Digit>-;
+// #pragma link C++ class Iterator<Cluster>-;
+// #pragma link C++ class Iterator<Track>-;
 // #pragma link C++ class vector<Digit*>+;
 
 #endif

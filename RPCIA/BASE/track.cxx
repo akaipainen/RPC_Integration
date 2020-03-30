@@ -20,7 +20,7 @@ Int_t Track::trigger_id() const
 {
     if (!clusters_.empty())
     {
-        return clusters_[0]->trigger_id();
+        return clusters_.trigger_id();
     }
     return -1;
 }
@@ -38,12 +38,12 @@ void Track::add(Cluster *cluster)
 {
     for (auto &c : clusters_)
     {
-        if (cluster == c) {
+        if (*cluster == c) {
             return;
         }
     }
     
-    bool cluster_dir = (*cluster->digits_begin())->direction();
+    bool cluster_dir = cluster->begin_digits()->direction();
     if (!clusters_.empty() && cluster_dir != direction_)
     {
         two_coords_ = true;
@@ -53,7 +53,7 @@ void Track::add(Cluster *cluster)
         direction_ = cluster_dir;
     }
     
-    clusters_.push_back(cluster);
+    clusters_.add(*cluster);
     num_clusters_++;
     has_plane_ = false;
     
@@ -77,12 +77,12 @@ void Track::init()
     has_plane_ = true;
 }
 
-std::vector<Cluster*>::iterator Track::begin_clusters()
+Iterator<Cluster> Track::begin_clusters()
 {
     return clusters_.begin();
 }
 
-std::vector<Cluster*>::iterator Track::end_clusters()
+Iterator<Cluster> Track::end_clusters()
 {
     return clusters_.end();
 }
@@ -101,7 +101,7 @@ void Track::merge(const Track &track)
 {
     for (auto &cluster: track.clusters_)
     {
-        add(cluster);
+        add(&cluster);
     }
     init();
 }

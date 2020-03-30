@@ -20,15 +20,15 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
 {
     track_store->clear();
     // Find segments
-    for (auto cpit = cluster_store->begin(); cpit != cluster_store->end(); cpit++)
+    for (auto cit = cluster_store->begin(); cit != cluster_store->end(); cit++)
     {
-        for (auto testpit = next(cpit); testpit != cluster_store->end(); testpit++)
+        for (auto testit = next(cit); testit != cluster_store->end(); testit++)
         {
-            if (should_segment(**cpit, **testpit))
+            if (should_segment(*cit, *testit))
             {
                 Track track;
-                track.add(*cpit);
-                track.add(*testpit);
+                track.add(cit.get());
+                track.add(testit.get());
                 track.init();
                 track_store->add(track);
             }
@@ -36,14 +36,14 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
     }
 
     // Combine segments
-    for (auto tpit = track_store->begin(); tpit != track_store->end(); tpit++)
+    for (auto tit = track_store->begin(); tit != track_store->end(); tit++)
     {
-        for (auto testpit = next(tpit); testpit != track_store->end(); testpit++)
+        for (auto testit = next(tit); testit != track_store->end(); testit++)
         {
-            if (should_combine_segments(**tpit, **testpit))
+            if (should_combine_segments(*tit, *testit))
             {
-                (*tpit)->merge(**testpit);
-                track_store->remove(testpit--);
+                tit->merge(*testit);
+                track_store->remove(testit--);
             }
         }
     }
@@ -51,13 +51,13 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
 
 void Tracker::set_muon_digits(Store<Track> *track_store)
 {
-    for (auto tpit = track_store->begin(); tpit != track_store->end(); tpit++)
+    for (auto tit = track_store->begin(); tit != track_store->end(); tit++)
     {
-        for (auto cpit = (*tpit)->begin_clusters(); cpit != (*tpit)->end_clusters(); cpit++)
+        for (auto cit = tit->begin_clusters(); cit != tit->end_clusters(); cit++)
         {
-            for (auto dpit = (*cpit)->digits_begin(); dpit != (*cpit)->digits_end(); dpit++)
+            for (auto dit = cit->begin_digits(); dit != cit->end_digits(); dit++)
             {
-                (*dpit)->set_muon(true);
+                dit->set_muon(true);
             }
         }
     }

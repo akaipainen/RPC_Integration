@@ -1,6 +1,8 @@
 #if !defined(RECONSTRUCTOR_H)
 #define RECONSTRUCTOR_H
 
+#include <vector>
+
 #include <TTree.h>
 
 #include "digit_maker.h"
@@ -29,6 +31,8 @@ private:
 
     TTree *tree_;
 
+    std::vector<int> *noisy_strips_;
+
 public:
     Reconstructor();
     ~Reconstructor();
@@ -41,6 +45,12 @@ public:
 
     // Set TTree to output to
     void set_tree(TTree &tree);
+
+    // Add a noisy Strip to ignore in reconstruction and analysis
+    void add_noise(const int tdc, const int strip);
+
+    // Add a noisy Strip to ignore in reconstruction and analysis
+    void add_noise(const int strip_id);
 
     // Run full reconstruction and save to tree
     void run();

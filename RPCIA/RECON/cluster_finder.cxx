@@ -18,44 +18,44 @@ void ClusterFinder::make_preclusters(Store<Digit> *digit_store, Store<Cluster> *
 {
     cluster_store->clear(); // reset the clusters
     
-    for (auto dpit = digit_store->begin(); dpit != digit_store->end(); dpit++)
+    for (auto dit = digit_store->begin(); dit != digit_store->end(); dit++)
     {
-        auto cpit = cluster_store->begin();
+        auto cit = cluster_store->begin();
         
         // While-else block to either add a digit to 
         // an existing cluster or create a new cluster
 
-        while (cpit != cluster_store->end())
+        while (cit != cluster_store->end())
         {
-            if (should_add(**cpit, **dpit)) {
-                (*cpit)->add_digit(*dpit);
+            if (should_add(*cit, *dit)) {
+                cit->add_digit(*dit);
                 break;
             }
-            cpit++;
+            cit++;
         }
-        if (cpit == cluster_store->end())
+        if (cit == cluster_store->end())
         {
             Cluster cluster;
-            cluster.add_digit(*dpit);
+            cluster.add_digit(*dit);
             cluster_store->add(cluster);
         }
     }
     
     // Find all of the cluster positions now
-    for (auto cpit = cluster_store->begin(); cpit != cluster_store->end(); cpit++)
+    for (auto cit = cluster_store->begin(); cit != cluster_store->end(); cit++)
     {
-        (*cpit)->init();
+        cit->init();
     }
 }
 
 bool ClusterFinder::should_add(const Cluster &cluster, const Digit &digit) const
 {
-    for (auto dpit = cluster.digits_begin(); dpit != cluster.digits_end(); dpit++)
+    for (auto dit = cluster.begin_digits(); dit != cluster.end_digits(); dit++)
     {
-        if (Detector::strip_adjacent((*dpit)->tdc(), (*dpit)->strip(),
+        if (Detector::strip_adjacent(dit->tdc(), dit->strip(),
                                      digit.tdc(), digit.strip()))
         {
-            if (TDC::combined_time_ns((*dpit)->bcid_tdc(), (*dpit)->fine_time())
+            if (TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())
               - TDC::combined_time_ns(digit.bcid_tdc(), digit.fine_time())
               < 10) // in ns
             {

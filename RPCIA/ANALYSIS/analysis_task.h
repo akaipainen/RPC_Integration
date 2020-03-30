@@ -1,10 +1,13 @@
 #if !defined(ANALYSIS_TASK_H)
 #define ANALYSIS_TASK_H
 
+#include <vector>
+
 #include "store.h"
 #include "digit.h"
 #include "cluster.h"
 #include "track.h"
+#include "strip.h"
 
 class AnalysisTask
 {

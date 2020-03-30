@@ -1,12 +1,12 @@
 #if !defined(CLUSTER_H)
 #define CLUSTER_H
 
-#include <vector>
-
 #include <TVector3.h>
 #include <TObject.h>
 
 #include "digit.h"
+#include "store.h"
+#include "iterator.h"
 
 class Cluster : public TObject
 {
@@ -14,10 +14,10 @@ private:
     Int_t unique_id_;
     static Int_t id_counter_;
 
-    std::vector<Digit *> digits_;
+    Store<Digit> digits_;
     Int_t size_;
     
-    Int_t num_tdcs_;
+    // Int_t num_tdcs_;
     std::vector<int> tdcs_;
 
     Bool_t has_position_; // true when computed
@@ -34,16 +34,16 @@ public:
     Int_t trigger_id() const;
 
     // Add a digit to the cluster
-    void add_digit(Digit *digit);
+    void add_digit(Digit &digit);
 
     // Get the total number of digits
     Int_t num_digits();
 
     // Get begin iterator for digits
-    std::vector<Digit*>::const_iterator digits_begin() const;
+    Iterator<Digit> begin_digits() const;
 
     // Get end iterator for digits
-    std::vector<Digit*>::const_iterator digits_end() const;
+    Iterator<Digit> end_digits() const;
 
     // Calculate the position of the cluster
     void init();
@@ -56,7 +56,7 @@ public:
 
 private:
     // Update the number of tdcs this cluster contains
-    void update_num_tdcs();
+    // void update_num_tdcs();
 
     ClassDef(Cluster, 1);
 };

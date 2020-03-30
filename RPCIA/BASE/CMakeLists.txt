@@ -13,6 +13,7 @@ include_directories(${RpcIA_SOURCE_DIR}/MAPPING)
 set(SRCS
     cluster.cxx
     digit.cxx
+    iterator.cxx
     loader.cxx
     noisy_rollover_counter.cxx
     store.cxx

@@ -2,16 +2,22 @@
 
 #include "raw_reader.h"
 #include "raw_stream.h"
-#include "tdc_strip_map.h"
 
 DigitMaker::DigitMaker() {
     raw_stream_ = new RawStream();
+    noisy_strips_ = nullptr;
 }
 DigitMaker::~DigitMaker() {
     delete raw_stream_;
 }
 
-int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store) {
+void DigitMaker::set_noisy_strips(std::vector<int> *noisy_strips)
+{
+    noisy_strips_ = noisy_strips;
+}
+
+int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store)
+{
     if (!digit_store) {
         return -1;
     }
@@ -40,8 +46,20 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store) 
                                     felix_counter);
         Digit digit(trigger_id, bcid_fpga, felix_counter, tdc, 
                     channel, width, bcid_tdc, fine_time);
-        digit_store_->add(digit);
-        new_digit_count++;
+        if (!noisy(digit.tdc(), digit.strip()))
+        {
+            digit_store_->add(digit);
+            new_digit_count++;
+        }
     } while (is_more);
     return new_digit_count;
+}
+
+bool DigitMaker::noisy(const int tdc, const int strip)
+{
+    if (!noisy_strips_)
+    {
+        return false;
+    }
+    return std::find(noisy_strips_->begin(), noisy_strips_->end(), tdc*32+strip) != noisy_strips_->end();
 }
