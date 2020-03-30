@@ -3,3 +3,6 @@ install/
 .vscode
 .DS_STORE
 /macros
+
+.root
+.pdf
