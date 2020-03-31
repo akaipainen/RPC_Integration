@@ -63,7 +63,7 @@ int TDC::strip_to_channel(int strip)
     return TDC::get().strip_to_channel_imp(strip);
 }
 
-int TDC::combined_time_ns(int bcid, int fine_time)
+double TDC::combined_time_ns(int bcid, int fine_time)
 {
     return TDC::get().combined_time_ns_imp(bcid, fine_time);
 }

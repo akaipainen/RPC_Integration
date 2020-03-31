@@ -20,7 +20,7 @@ public:
     static int channel_to_strip(int channel);
     static int strip_to_channel(int strip);
     
-    static int combined_time_ns(int bcid, int fine_time);
+    static double combined_time_ns(int bcid, int fine_time);
 
 private:
     TDC();

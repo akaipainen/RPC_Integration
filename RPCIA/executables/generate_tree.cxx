@@ -49,11 +49,17 @@ int main(int argc, char *argv[]) {
     AnalysisManager mgr;
     mgr.init(tree);
     // mgr.add_task(new SimpleTask());
-    mgr.add_task(new TimeDifferenceFromAverage());
+    std::vector<double> *time_offsets = new std::vector<double>();
+    mgr.add_task(new TimeDifferenceFromAverage("time_diff_avg", nullptr, time_offsets));
     mgr.add_task(new TimeDifferenceVsDistance());
     mgr.add_task(new ExtraHitsOnStrip());
     // mgr.add_task(new IsolateNoise());
     mgr.run();
+
+    AnalysisManager mgr2;
+    mgr2.init(tree);
+    mgr2.add_task(new TimeDifferenceFromAverage("time_diff_avg_offset", time_offsets, nullptr));
+    mgr2.run();
 
     loader->write();
 
