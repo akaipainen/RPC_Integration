@@ -19,10 +19,11 @@
 #include "reconstructor.h"
 #include "analysis_manager.h"
 
-#include "simple_task.h"
 #include "time_difference_from_average.h"
 #include "time_difference_vs_distance.h"
 #include "extra_hits_on_strip.h"
+#include "hit_rates.h"
+#include "event_hits_on_strip.h"
 
 #include <TTree.h>
 
@@ -48,11 +49,12 @@ int main(int argc, char *argv[]) {
 
     AnalysisManager mgr;
     mgr.init(tree);
-    // mgr.add_task(new SimpleTask());
     std::vector<double> *time_offsets = new std::vector<double>();
+    mgr.add_task(new HitRates());
     mgr.add_task(new TimeDifferenceFromAverage("time_diff_avg", nullptr, time_offsets));
     mgr.add_task(new TimeDifferenceVsDistance());
     mgr.add_task(new ExtraHitsOnStrip());
+    mgr.add_task(new EventHitsOnStrip());
     // mgr.add_task(new IsolateNoise());
     mgr.run();
 

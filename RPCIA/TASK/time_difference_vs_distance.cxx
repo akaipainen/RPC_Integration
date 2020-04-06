@@ -29,12 +29,16 @@ void TimeDifferenceVsDistance::create_outputs()
     
     for (int tdc = 0; tdc < 9; tdc++)
     {
-        tdc_color_.push_back(new TH2F(Form("tdc_%d", tdc), Form("Time difference vs distance (tdc = %d)", tdc),
-                                      32, 0, 32, 1600, 0, 1600));
+        tdc_color_.push_back(new TH2F(Form("tdc_%d", tdc), Form("Time difference between pairs of hits at a given distance apart (tdc = %d)", tdc),
+                                      32, 0, 32, 128, 0, 25));
         tdc_color_.back()->SetOption("COLZ");
+        tdc_color_.back()->GetXaxis()->SetTitle("Distance");
+        tdc_color_.back()->GetYaxis()->SetTitle("Time (ns)");
 
-        tdc_profile_.push_back(new TProfile(Form("profile_tdc_%d", tdc), Form("Profile plot of time difference vs distance (tdc = %d)", tdc),
-                                            32, 0, 32, 0, 1600));
+        tdc_profile_.push_back(new TProfile(Form("profile_tdc_%d", tdc), Form("Time difference between pairs of hits at a given distance apart (tdc = %d)", tdc),
+                                            32, 0, 32, 0, 25));
+        tdc_color_.back()->GetXaxis()->SetTitle("Distance");
+        tdc_color_.back()->GetYaxis()->SetTitle("Time (ns)");
     }
 
     gDirectory->cd("..");
@@ -64,13 +68,20 @@ void TimeDifferenceVsDistance::execute()
                 double time1 = TDC::combined_time_ns(dit1->bcid_tdc(), dit1->fine_time());
                 double time2 = TDC::combined_time_ns(dit2->bcid_tdc(), dit2->fine_time());
 
+                // Must be within 25ns to be considered even remotely a hit
+                if (std::abs(time2 - time1) > 25)
+                {
+                    continue;
+                }
+
                 TVector3 pos1 = Detector::position(dit1->tdc(), dit1->strip());
                 TVector3 pos2 = Detector::position(dit2->tdc(), dit2->strip());
                 
                 int dist = std::abs(pos1[0]-pos2[0] + pos1[1]-pos2[1]);
+                auto time = std::abs(time2 - time1);
                 
-                tdc_color_[dit1->tdc()]->Fill(dist, std::abs(time1 - time2));
-                tdc_profile_[dit1->tdc()]->Fill(dist, std::abs(time1 - time2));
+                tdc_color_[dit1->tdc()]->Fill(dist, time);
+                tdc_profile_[dit1->tdc()]->Fill(dist, time);
             }
         }
     }

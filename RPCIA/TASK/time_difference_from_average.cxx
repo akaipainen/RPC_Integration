@@ -34,7 +34,7 @@ void TimeDifferenceFromAverage::create_outputs()
     {
         tdc_.push_back(new TH1D(Form("tdc_%d", tdc), Form("Time difference from average (tdc = %d)", tdc),
                                      200/25*128, -100, 100));
-        tdc_.back()->GetXaxis()->SetTitle("Time difference from event average (ns)");
+        tdc_.back()->GetXaxis()->SetTitle("Time difference from direction average (ns)");
         tdc_.back()->GetYaxis()->SetTitle("Count");
     }
     gDirectory->cd("..");
@@ -45,7 +45,7 @@ void TimeDifferenceFromAverage::create_outputs()
     {
         eta_.push_back(new TH1D(Form("eta_layer_%d", layer), Form("Time difference from average (eta layer = %d)", layer),
                                      200/25*128, -100, 100));
-        eta_.back()->GetXaxis()->SetTitle("Time difference from event average (ns)");
+        eta_.back()->GetXaxis()->SetTitle("Time difference from direction average (ns)");
         eta_.back()->GetYaxis()->SetTitle("Count");
     }
     gDirectory->cd("..");
@@ -56,7 +56,7 @@ void TimeDifferenceFromAverage::create_outputs()
     {
         phi_.push_back(new TH1D(Form("phi_layer_%d", layer), Form("Time difference from average (phi layer = %d)", layer),
                                      200/25*128, -100, 100));
-        phi_.back()->GetXaxis()->SetTitle("Time difference from event average (ns)");
+        phi_.back()->GetXaxis()->SetTitle("Time difference from direction average (ns)");
         phi_.back()->GetYaxis()->SetTitle("Count");
     }
     gDirectory->cd("..");
