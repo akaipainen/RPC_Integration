@@ -1,6 +1,8 @@
 #if !defined(CLUSTER_H)
 #define CLUSTER_H
 
+#include <vector>
+
 #include <TVector3.h>
 #include <TObject.h>
 
@@ -37,13 +39,19 @@ public:
     void add_digit(Digit &digit);
 
     // Get the total number of digits
-    Int_t num_digits();
+    Int_t num_digits() const;
 
     // Get begin iterator for digits
     Iterator<Digit> begin_digits() const;
 
     // Get end iterator for digits
     Iterator<Digit> end_digits() const;
+    
+    // Get begin iterator for tdcs
+    std::vector<int>::const_iterator begin_tdcs() const;
+
+    // Get end iterator for tdcs
+    std::vector<int>::const_iterator end_tdcs() const;
 
     // Calculate the position of the cluster
     void init();

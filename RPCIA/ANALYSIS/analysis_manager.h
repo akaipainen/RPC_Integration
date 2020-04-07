@@ -26,6 +26,8 @@ private:
     Store<Cluster> *cluster_store_;
     Store<Track> *track_store_;
 
+    const char* outdir_;
+
 public:
     AnalysisManager();
     ~AnalysisManager();
@@ -36,6 +38,9 @@ public:
 
     // Add an analysis task
     void add_task(AnalysisTask *task);
+    
+    // Add an analysis task
+    void set_output_dir(const char* outdir);
 
     // Run all the analysis tasks
     // Save output to output file

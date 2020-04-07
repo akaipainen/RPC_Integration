@@ -12,12 +12,10 @@ Int_t Cluster::id_counter_ = 0;
 Cluster::Cluster()
  : unique_id_(Cluster::id_counter_++)
  , size_(0)
-//  , num_tdcs_(0)
  , has_position_(false)
  , position_(-1, -1, -1)
  , position_error_(0, 0, 0)
 {
-    tdcs_.resize(4, -1); // initialize the tdcs array with 0s
 }
 
 bool Cluster::operator==(const Cluster &other) const
@@ -46,8 +44,19 @@ void Cluster::add_digit(Digit &digit)
 {   
     digits_.add(digit);
     size_++;
-    // update_num_tdcs();
     has_position_ = false;
+    
+    // Update tdcs
+    if (std::find(tdcs_.begin(), tdcs_.end(), digit.tdc()) == tdcs_.end())
+    {
+        tdcs_.push_back(digit.tdc());
+    }
+
+    
+}
+
+Int_t Cluster::num_digits() const {
+    return size_;
 }
 
 Iterator<Digit> Cluster::begin_digits() const
@@ -58,6 +67,16 @@ Iterator<Digit> Cluster::begin_digits() const
 Iterator<Digit> Cluster::end_digits() const
 {
     return digits_.end();
+}
+
+std::vector<int>::const_iterator Cluster::begin_tdcs() const
+{
+    return tdcs_.begin();
+}
+
+std::vector<int>::const_iterator Cluster::end_tdcs() const
+{
+    return tdcs_.end();
 }
 
 // void Cluster::update_num_tdcs()
@@ -79,6 +98,11 @@ Iterator<Digit> Cluster::end_digits() const
 
 void Cluster::init()
 {
+    // if (num_digits() > 5)
+    // {
+    //     std::cout << "Trigger id: " << trigger_id() << "(" << num_digits() << ")" << std::endl;
+    // }
+
     if (has_position_)
     {
         return;

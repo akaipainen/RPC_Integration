@@ -24,6 +24,8 @@
 #include "extra_hits_on_strip.h"
 #include "hit_rates.h"
 #include "event_hits_on_strip.h"
+#include "cluster_size.h"
+#include "event_display.h"
 
 #include <TTree.h>
 
@@ -50,11 +52,14 @@ int main(int argc, char *argv[]) {
     AnalysisManager mgr;
     mgr.init(tree);
     std::vector<double> *time_offsets = new std::vector<double>();
-    mgr.add_task(new HitRates());
+    std::vector<int> *event_display = new std::vector<int>{251, 273};
+    mgr.add_task(new HitRates("hit_rates"));
     mgr.add_task(new TimeDifferenceFromAverage("time_diff_avg", nullptr, time_offsets));
-    mgr.add_task(new TimeDifferenceVsDistance());
-    mgr.add_task(new ExtraHitsOnStrip());
-    mgr.add_task(new EventHitsOnStrip());
+    mgr.add_task(new EventDisplay("event_display", event_display));
+    mgr.add_task(new ClusterSize("cluster_size"));
+    mgr.add_task(new TimeDifferenceVsDistance("time_difference_vs_distance"));
+    mgr.add_task(new ExtraHitsOnStrip("extra_hits_on_strip"));
+    mgr.add_task(new EventHitsOnStrip("event_hits_on_strip"));
     // mgr.add_task(new IsolateNoise());
     mgr.run();
 

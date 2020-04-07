@@ -1,6 +1,7 @@
 #include "analysis_manager.h"
 
 AnalysisManager::AnalysisManager()
+ : outdir_("output")
 {
     digit_store_ = new Store<Digit>();
     cluster_store_ = new Store<Cluster>();
@@ -26,6 +27,14 @@ void AnalysisManager::add_task(AnalysisTask *task)
 {
     task->connect_inputs(digit_store_, cluster_store_, track_store_);
     tasks_.push_back(task);
+
+    task->set_output_dir(outdir_);
+    task->init_task();
+}
+
+void AnalysisManager::set_output_dir(const char* outdir)
+{
+    outdir_ = outdir;
 }
 
 void AnalysisManager::run()
@@ -42,7 +51,7 @@ void AnalysisManager::execute_tasks()
 {
     for (auto &task : tasks_)
     {
-        task->execute();
+        task->execute_task();
     }
 }
 
@@ -50,6 +59,6 @@ void AnalysisManager::terminate_tasks()
 {
     for (auto &task : tasks_)
     {
-        task->terminate();
+        task->terminate_task();
     }
 }

@@ -21,6 +21,11 @@ void ClusterFinder::make_preclusters(Store<Digit> *digit_store, Store<Cluster> *
     for (auto dit = digit_store->begin(); dit != digit_store->end(); dit++)
     {
         auto cit = cluster_store->begin();
+
+        if (dit->trigger_id() == 251)
+        {
+            std::cout;
+        }
         
         // While-else block to either add a digit to 
         // an existing cluster or create a new cluster

@@ -1,5 +1,7 @@
 #include "digit_maker.h"
 
+#include <unordered_set>
+
 #include "raw_reader.h"
 #include "raw_stream.h"
 
@@ -37,6 +39,7 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store)
     Int_t bcid_fpga;
     Int_t felix_counter;
 
+    std::unordered_set<int> already_hit;
     int new_digit_count = 0;
     bool is_more = false;
     do 
@@ -46,10 +49,12 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store)
                                     felix_counter);
         Digit digit(trigger_id, bcid_fpga, felix_counter, tdc, 
                     channel, width, bcid_tdc, fine_time);
-        if (!noisy(digit.tdc(), digit.strip()))
+        if (!noisy(digit.tdc(), digit.strip()) &&
+            already_hit.find(digit.tdc()*32+digit.strip()) == already_hit.end())
         {
             digit_store_->add(digit);
             new_digit_count++;
+            already_hit.insert(digit.tdc()*32+digit.strip());
         }
     } while (is_more);
     return new_digit_count;

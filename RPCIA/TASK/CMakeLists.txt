@@ -14,18 +14,21 @@ include_directories(${RpcIA_SOURCE_DIR}/BASE
 
 # Set sources in alphabetical order
 set(SRCS
-    event_hits_on_strip.cxx
-    extra_hits_on_strip.cxx
-    hit_rates.cxx
-    time_difference_from_average.cxx
-    time_difference_vs_distance.cxx
     )
 
 # Headers from sources
 string(REPLACE ".cxx" ".h" HDRS "${SRCS}")
 
 # Additional headers
-# list(APPEND HDRS "header1.h" "header2.h")
+list(APPEND HDRS 
+     cluster_size.h
+     event_display.h
+     event_hits_on_strip.h
+     extra_hits_on_strip.h
+     hit_rates.h
+     time_difference_from_average.h
+     time_difference_vs_distance.h
+    )
 
 # Generate the dictionary
 get_directory_property(incdirs INCLUDE_DIRECTORIES)

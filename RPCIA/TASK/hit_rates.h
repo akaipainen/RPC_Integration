@@ -10,20 +10,45 @@
 
 class HitRates : public AnalysisTask
 {
-private:
-    TCanvas *canvas_;
-
     std::vector<TH1F *> tdc_;
 
 public:
-    HitRates();
+    HitRates(const char* name)
+     : AnalysisTask(name, 500, 300)
+    { }
+
     ~HitRates();
 
-    void create_outputs();
+    void init()
+    {
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            tdc_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Hit rate vs strip (tdc = %d)", tdc),
+                                    32, 0, 32));
+            tdc_.back()->GetXaxis()->SetTitle("Strip");
+            tdc_.back()->GetYaxis()->SetTitle("Count");
+        }
+    }
 
-    void execute();
+    void execute()
+    {
+        for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
+        {
+            tdc_[dit->tdc()]->Fill(dit->strip());
+        }
+    }
 
-    void terminate();
+    void terminate()
+    {
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            canvas_->cd(1);
+            tdc_[tdc]->Draw();
+
+            canvas_->Print(Form("%s/%s/tdc_%d.pdf", outdir_, name_, tdc));
+            canvas_->Clear("D");
+        }
+    }
 };
 
 
