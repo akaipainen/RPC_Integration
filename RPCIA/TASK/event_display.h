@@ -59,6 +59,7 @@ public:
                 tdc_[dit->tdc()]->Fill(dit->strip(), TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())-first_time);
             }
             
+            // Draw to canvases
             for (auto tdc = 0; tdc < 9; tdc++)
             {
                 if (tdc < 3)

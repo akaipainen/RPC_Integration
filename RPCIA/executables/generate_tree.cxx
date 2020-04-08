@@ -66,6 +66,7 @@ int main(int argc, char *argv[]) {
     AnalysisManager mgr2;
     mgr2.init(tree);
     mgr2.add_task(new TimeDifferenceFromAverage("time_diff_avg_offset", time_offsets, nullptr));
+    
     mgr2.run();
 
     loader->write();

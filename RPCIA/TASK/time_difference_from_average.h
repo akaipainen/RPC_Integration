@@ -30,8 +30,9 @@ public:
      , output_(output)
     { }
 
-    ~TimeDifferenceFromAverage()
+    ~TimeDifferenceFromAverage() 
     {
+   
         for (auto tdc = 0; tdc < 9; tdc++)
         {
             delete tdc_[tdc];
@@ -40,12 +41,11 @@ public:
 
     void init()
     {
-        canvas_->Divide(2, 1);
 
         for (int tdc = 0; tdc < 9; tdc++)
         {
             tdc_.push_back(new TH1D(Form("tdc_%d", tdc), Form("Time difference from average (tdc = %d)", tdc),
-                                        200/25*128, -100, 100));
+                                        200/25*128, -100, 100)); // binning = number of ticks
             tdc_.back()->GetXaxis()->SetTitle("Time difference from direction average (ns)");
             tdc_.back()->GetYaxis()->SetTitle("Count");
         }
@@ -117,6 +117,8 @@ public:
 
     void terminate()
     {
+        canvas_->Divide(2, 1);
+
         TF1* formula = new TF1("full_width_3/4_max", "gaus");
         if (output_) output_->resize(9);
         for (int tdc = 0; tdc < 9; tdc++)

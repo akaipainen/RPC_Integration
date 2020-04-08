@@ -30,7 +30,7 @@ public:
         for (int tdc = 0; tdc < 9; tdc++)
         {
             tdc_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Cluster size (tdc = %d)", tdc),
-                                        16, 0, 16));
+                                         16, 0, 16));
             tdc_.back()->GetXaxis()->SetTitle("Cluster size");
             tdc_.back()->GetYaxis()->SetTitle("Count");
         }
@@ -44,7 +44,7 @@ public:
             {
                 tdc_[*t]->Fill(cit->num_digits());
             }
-        }  
+        }
     }
 
     void terminate()
