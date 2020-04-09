@@ -20,15 +20,11 @@ set(SRCS
 string(REPLACE ".cxx" ".h" HDRS "${SRCS}")
 
 # Additional headers
-list(APPEND HDRS 
-     cluster_size.h
-     event_display.h
-     event_hits_on_strip.h
-     extra_hits_on_strip.h
-     hit_rates.h
-     time_difference_from_average.h
-     time_difference_vs_distance.h
-    )
+file(GLOB ADD_HEADERS "*.h")
+list(FILTER ADD_HEADERS EXCLUDE REGEX ".*LinkDef.*")
+list(FILTER ADD_HEADERS EXCLUDE REGEX ".*example_task.*")
+list(REMOVE_ITEM ADD_HEADERS TO_REMOVE)
+list(APPEND HDRS ${ADD_HEADERS})
 
 # Generate the dictionary
 get_directory_property(incdirs INCLUDE_DIRECTORIES)
