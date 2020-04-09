@@ -12,8 +12,8 @@ class ExampleTask : public AnalysisTask
     std::vector<TH1F *> tdc_;
 
     // Change these to set size of printed canvas
-    const int w = 1;
-    const int h = 1;
+    static const int w = 1;
+    static const int h = 1;
 
     // Uncomment and replace this if you need to feed input or return output from this task
     // std::vector<Digit>* input_;
