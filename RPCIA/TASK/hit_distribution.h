@@ -81,8 +81,8 @@ public:
     {
         for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
         {
-            tdc_strip_count_[dit->tdc()]->Fill(dit->channel());
-            tdc_strip_rate_[dit->tdc()]->Fill(dit->channel(), 1.0/run_duration_);
+            tdc_strip_count_[dit->tdc()]->Fill(dit->strip());
+            tdc_strip_rate_[dit->tdc()]->Fill(dit->strip(), 1.0/run_duration_);
 
             tdc_channel_count_[dit->tdc()]->Fill(dit->channel());
             tdc_channel_rate_[dit->tdc()]->Fill(dit->channel(), 1.0/run_duration_);

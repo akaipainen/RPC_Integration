@@ -22,7 +22,8 @@ public:
     void make_preclusters(Store<Digit> *digit_store, Store<Cluster> *cluster_store) const;
 
 private:
-    bool should_add(const Cluster& cluster, const Digit &digit) const;
+    // bool should_add(const Cluster& cluster, const Digit &digit) const;
+    bool satisfy_constraints(const Digit &digit1, const Digit &digit2) const;
     
 };
 

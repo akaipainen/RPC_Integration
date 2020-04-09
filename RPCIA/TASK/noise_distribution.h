@@ -1,5 +1,5 @@
-#if !defined(MUON_DISTRIBUTION_H)
-#define MUON_DISTRIBUTION_H
+#if !defined(NOISE_DISTRIBUTION_H)
+#define NOISE_DISTRIBUTION_H
 
 #include "analysis_task.h"
 
@@ -8,24 +8,24 @@
 #include <TCanvas.h>
 #include <TH1.h>
 
-class MuonDistribution : public AnalysisTask
+class NoiseDistribution : public AnalysisTask
 {
     std::vector<TH1F *> tdc_strip_rate_;
     std::vector<TH1F *> tdc_channel_rate_;
     
-    const double& run_duration_; // Run duration in seconds
+    int num_events_; // Number of events
 
     // Change these to set size of printed canvas
     static const int w = 2;
     static const int h = 1;
 
 public:
-    MuonDistribution(const char* name, const double& input=1)
+    NoiseDistribution(const char* name)
      : AnalysisTask(name, 500*w, 300*h)
-     , run_duration_(input)
+     , num_events_(0)
     { }
 
-    ~MuonDistribution();
+    ~NoiseDistribution();
 
     void init()
     {
@@ -36,10 +36,10 @@ public:
         for (int tdc = 0; tdc < 18; tdc++)
         {
             gDirectory->cd("rate");
-            tdc_strip_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Muon Rate by Strip (tdc = %d)", tdc),
+            tdc_strip_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Noise Rate by Strip (tdc = %d)", tdc),
                                           32, 0, 32));
             tdc_strip_rate_.back()->GetXaxis()->SetTitle("Strip");
-            tdc_strip_rate_.back()->GetYaxis()->SetTitle("Muon Rate [Hz]");
+            tdc_strip_rate_.back()->GetYaxis()->SetTitle("Noise Rate [Hz]");
             gDirectory->cd("..");
         }
         gDirectory->cd("..");
@@ -52,10 +52,10 @@ public:
         {
 
             gDirectory->cd("rate");
-            tdc_channel_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Muon Rate by Channel (tdc = %d)", tdc),
+            tdc_channel_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Noise Rate by Channel (tdc = %d)", tdc),
                                             32, 0, 32));
             tdc_channel_rate_.back()->GetXaxis()->SetTitle("TDC Channel");
-            tdc_channel_rate_.back()->GetYaxis()->SetTitle("Muon Rate [Hz]");
+            tdc_channel_rate_.back()->GetYaxis()->SetTitle("Noise Rate [Hz]");
             gDirectory->cd("..");
         }
         gDirectory->cd("..");
@@ -65,12 +65,13 @@ public:
     {
         for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
         {
-            if (dit->muon())
+            if (!dit->muon())
             {
-                tdc_strip_rate_[dit->tdc()]->Fill(dit->strip(), 1.0/run_duration_);
-                tdc_channel_rate_[dit->tdc()]->Fill(dit->channel(), 1.0/run_duration_);
+                tdc_strip_rate_[dit->tdc()]->Fill(dit->strip());
+                tdc_channel_rate_[dit->tdc()]->Fill(dit->channel());
             }
         }
+        num_events_++;
     }
 
     void terminate()
@@ -81,9 +82,11 @@ public:
         for (int tdc = 0; tdc < 18; tdc++)
         {
             canvas_->cd(1);
+            tdc_strip_rate_[tdc]->Scale(1/(0.0000016*num_events_));
             tdc_strip_rate_[tdc]->Draw();
 
             canvas_->cd(2);
+            tdc_channel_rate_[tdc]->Scale(1/(0.0000016*num_events_));
             tdc_channel_rate_[tdc]->Draw();
 
             canvas_->Print(Form("%s/%s/tdc_%d.pdf", outdir_, name_, tdc));
@@ -93,4 +96,4 @@ public:
 };
 
 
-#endif // MUON_DISTRIBUTION_H
+#endif // NOISE_DISTRIBUTION_H

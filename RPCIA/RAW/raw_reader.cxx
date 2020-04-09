@@ -34,9 +34,29 @@ bool RawReader::next() {
         file_stream_.read(data_+i*2, 2);
     }
 
+    bool ok = true;
+    // std::cout << data_[2*num_bytes-2] << " " << data_[2*num_bytes-1] << std::endl;
+    // If packet does not end in 'aa', this is an error. Log it.
+    if (data_[2*num_bytes - 2] != 'a' || data_[2*num_bytes - 1] != 'a')
+    {
+        fprintf(stderr, "Error reading packet: %1.10s...\n", data_);
+        ok = false;
+    }
+    // If number of bytes is < 24, this is an error. Log it
+    if (num_bytes < 24) {
+        fprintf(stderr, "Error reading packet: %1.10s...\n", data_);
+        ok = false;
+    }
+    // If number of bytes is > 10000, this is an error. Log it
+    if (num_bytes > 1000) {
+        fprintf(stderr, "Error reading packet: %1.10s...\n", data_);
+        ok = false;
+    }
     
-    current_packet_ = Packet(data_);
-    // std::cout << strlen(data_) << std::endl;
+    // If ok, set current_packet_
+    // Else, go to next packet
+    if (ok) current_packet_ = Packet(data_);
+    else return next();
 
     delete[] data_;
     data_ = nullptr;

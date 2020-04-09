@@ -67,7 +67,7 @@ public:
         }
         first_time -= 5;
 
-        if (counter_ < 50 - input_->size() ||
+        if (counter_ < 100 - input_->size() ||
             std::find(input_->begin(), input_->end(), trigger_id) != input_->end())
         {
             // Reset histograms

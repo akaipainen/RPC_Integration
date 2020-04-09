@@ -47,6 +47,10 @@ int DigitMaker::raw_to_digits(RawReader *raw_reader, Store<Digit> *digit_store)
         is_more = raw_stream_->next(tdc, channel, width, bcid_tdc, 
                                     fine_time, trigger_id, bcid_fpga, 
                                     felix_counter);
+        if (tdc > 8) {
+            continue;
+        }
+
         Digit digit(trigger_id, bcid_fpga, felix_counter, tdc, 
                     channel, width, bcid_tdc, fine_time);
         if (!noisy(digit.tdc(), digit.strip()) &&

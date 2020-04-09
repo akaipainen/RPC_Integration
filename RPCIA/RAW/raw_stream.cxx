@@ -48,6 +48,11 @@ bool RawStream::next(int &tdc,
     //       " " << channel <<
     //       " " << width <<
     //       " " << packet.dataword(current_word_index_) << '\n';
+
+    // If tdc > 8, this is an error. Log it.
+    if (tdc > 8) {
+        std::cerr << "Error decoding packet: " << packet.str() << std::endl;
+    }
     
     if (++current_word_index_ < packet.num_datawords()) 
     {

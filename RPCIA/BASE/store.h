@@ -50,6 +50,18 @@ public:
     // End non const iterator
     Iterator<T> end() const;
 
+    // Return front object
+    T* front() const
+    {
+        return objects_->front();
+    }
+
+    // Return back object
+    T* back() const
+    {
+        return objects_->back();
+    }
+
     // Remove an object from the store
     void remove(Iterator<T> it);
 
