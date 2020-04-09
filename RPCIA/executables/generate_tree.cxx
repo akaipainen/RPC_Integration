@@ -23,6 +23,7 @@
 #include "time_difference_vs_distance.h"
 #include "extra_hits_on_strip.h"
 #include "hit_distribution.h"
+#include "muon_distribution.h"
 #include "event_hits_on_strip.h"
 #include "cluster_size.h"
 #include "event_display.h"
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
     std::vector<int> *event_display = new std::vector<int>{251, 273};
     double run_duration = 60; //seconds
     mgr.add_task(new HitDistribution("hit_distribution", 60));
+    mgr.add_task(new MuonDistribution("muon_distribution", 60));
     mgr.add_task(new TimeDifferenceFromAverage("time_diff_avg", nullptr, time_offsets));
     mgr.add_task(new EventDisplay("event_display", event_display));
     mgr.add_task(new ClusterSize("cluster_size"));

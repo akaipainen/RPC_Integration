@@ -77,12 +77,12 @@ void Track::init()
     has_plane_ = true;
 }
 
-Iterator<Cluster> Track::begin_clusters()
+Iterator<Cluster> Track::begin_clusters() const
 {
     return clusters_.begin();
 }
 
-Iterator<Cluster> Track::end_clusters()
+Iterator<Cluster> Track::end_clusters() const
 {
     return clusters_.end();
 }

@@ -19,8 +19,8 @@ class HitDistribution : public AnalysisTask
     const double& run_duration_; // Run duration in seconds
 
     // Change these to set size of printed canvas
-    static const int w = 1;
-    static const int h = 1;
+    static const int w = 2;
+    static const int h = 2;
 
 public:
     HitDistribution(const char* name, const double& input=1)

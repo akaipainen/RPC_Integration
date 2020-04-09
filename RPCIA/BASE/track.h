@@ -45,10 +45,10 @@ public:
     void init();
 
     // Get the start iterator to clusters
-    Iterator<Cluster> begin_clusters();
+    Iterator<Cluster> begin_clusters() const;
 
     // Get the end iterator to clusters
-    Iterator<Cluster> end_clusters();
+    Iterator<Cluster> end_clusters() const;
     
     // Get the plane this pretrack is in
     TVector3 plane() const;
