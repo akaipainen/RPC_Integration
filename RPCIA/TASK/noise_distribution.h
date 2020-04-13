@@ -4,6 +4,7 @@
 #include "analysis_task.h"
 
 #include <vector>
+#include <iostream>
 
 #include <TCanvas.h>
 #include <TH1.h>
@@ -77,6 +78,8 @@ public:
     void terminate()
     {
         canvas_->Divide(2, 1);
+
+        printf("Number of events: %d", num_events_);
 
         gStyle->SetOptStat(11);
         for (int tdc = 0; tdc < 18; tdc++)
