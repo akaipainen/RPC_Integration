@@ -21,6 +21,10 @@ void AnalysisManager::init(TTree *tree)
     digit_store_->connect(*tree_);
     cluster_store_->connect(*tree_);
     track_store_->connect(*tree_);
+
+    // Set global styles
+    gStyle->SetHistMinimumZero();
+    gStyle->SetOptStat(11);
 }
 
 void AnalysisManager::add_task(AnalysisTask *task)

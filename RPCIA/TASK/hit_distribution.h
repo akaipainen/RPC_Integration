@@ -19,8 +19,8 @@ class HitDistribution : public AnalysisTask
     const double& run_duration_; // Run duration in seconds
 
     // Change these to set size of printed canvas
-    static const int w = 2;
-    static const int h = 2;
+    static const int w = 3;
+    static const int h = 3;
 
 public:
     HitDistribution(const char* name, const double& input=1)
@@ -30,51 +30,61 @@ public:
 
     ~HitDistribution();
 
+    void set_style(TH1* hist)
+    {
+        // Customize style
+        hist->SetFillColor(16); // Bar color
+        hist->SetLineColor(kBlack); // Error bar color
+        hist->SetBarWidth(0.8); // Set bar width
+        hist->SetBarOffset(0.1);
+
+        for (int i = 0; i < 32; i++)
+        {
+            hist->GetXaxis()->SetBinLabel(i+1, Form("%d", i));
+        }
+    }
+
     void init()
     {
-        gDirectory->mkdir("strip");
-        gDirectory->cd("strip");
-        gDirectory->mkdir("count");
-        gDirectory->mkdir("rate");
+        // Create histograms
         for (int tdc = 0; tdc < 18; tdc++)
         {
-            gDirectory->cd("count");
-            tdc_strip_count_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Total Hit Count by Strip (tdc = %d)", tdc),
-                                          32, 0, 32));
-            tdc_strip_count_.back()->GetXaxis()->SetTitle("Strip");
-            tdc_strip_count_.back()->GetYaxis()->SetTitle("Hit Count");
-            gDirectory->cd("..");
+            tdc_strip_count_.push_back(
+                create_1d_histogram(Form("strip/count/tdc_%d", tdc),
+                                    Form("Total Hit Count by Strip (tdc = %d)", tdc),
+                                    "Strip",
+                                    "Hit Count",
+                                    0, 32, 1)
+            );
+            set_style(tdc_strip_count_.back());
+                
+            tdc_strip_rate_.push_back(
+                create_1d_histogram(Form("strip/rate/tdc_%d", tdc),
+                                    Form("Hit Rate by Strip (tdc = %d)", tdc),
+                                    "Strip",
+                                    "Hit Rate [Hz]",
+                                    0, 32, 1)
+            );
+            set_style(tdc_strip_rate_.back());
 
-            gDirectory->cd("rate");
-            tdc_strip_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Hit Rate by Strip (tdc = %d)", tdc),
-                                          32, 0, 32));
-            tdc_strip_rate_.back()->GetXaxis()->SetTitle("Strip");
-            tdc_strip_rate_.back()->GetYaxis()->SetTitle("Hit Rate [Hz]");
-            gDirectory->cd("..");
+            tdc_channel_count_.push_back(
+                create_1d_histogram(Form("channel/count/tdc_%d", tdc),
+                                    Form("Total Hit Count by Channel (tdc = %d)", tdc),
+                                    "Channel",
+                                    "Hit Count",
+                                    0, 32, 1)
+            );
+            set_style(tdc_channel_count_.back());
+                
+            tdc_channel_rate_.push_back(
+                create_1d_histogram(Form("channel/rate/tdc_%d", tdc),
+                                    Form("Hit Rate by Channel (tdc = %d)", tdc),
+                                    "Channel",
+                                    "Hit Rate [Hz]",
+                                    0, 32, 1)
+            );
+            set_style(tdc_channel_rate_.back());
         }
-        gDirectory->cd("..");
-
-        gDirectory->mkdir("channel");
-        gDirectory->cd("channel");
-        gDirectory->mkdir("count");
-        gDirectory->mkdir("rate");
-        for (int tdc = 0; tdc < 18; tdc++)
-        {    
-            gDirectory->cd("count");
-            tdc_channel_count_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Total Hit Count by Channel (tdc = %d)", tdc),
-                                            32, 0, 32));
-            tdc_channel_count_.back()->GetXaxis()->SetTitle("TDC Channel");
-            tdc_channel_count_.back()->GetYaxis()->SetTitle("Hit Count");
-            gDirectory->cd("..");
-
-            gDirectory->cd("rate");
-            tdc_channel_rate_.push_back(new TH1F(Form("tdc_%d", tdc), Form("Hit Rate by Channel (tdc = %d)", tdc),
-                                            32, 0, 32));
-            tdc_channel_rate_.back()->GetXaxis()->SetTitle("TDC Channel");
-            tdc_channel_rate_.back()->GetYaxis()->SetTitle("Hit Rate [Hz]");
-            gDirectory->cd("..");
-        }
-        gDirectory->cd("..");
     }
 
     void execute()
@@ -91,27 +101,41 @@ public:
 
     void terminate()
     {
-        canvas_->Divide(2, 2);
+        canvas_->Divide(3, 3);
 
-        gStyle->SetOptStat(11);
-        for (int tdc = 0; tdc < 18; tdc++)
+        for (int tdc = 0; tdc < 9; tdc++)
         {
-            canvas_->cd(1);
-            tdc_strip_count_[tdc]->Draw();
-
-            canvas_->cd(2);
-            tdc_strip_rate_[tdc]->Draw("E");
-            
-            canvas_->cd(3);
-            tdc_channel_count_[tdc]->Draw();
-
-            canvas_->cd(4);
-            tdc_channel_rate_[tdc]->Draw("E");
-
-            canvas_->Print(Form("%s/%s/tdc_%d.pdf", outdir_, name_, tdc));
-            canvas_->Clear("D");
+            cd_grid(tdc);
+            tdc_strip_count_[tdc]->Draw("BAR");
         }
+        canvas_->Print(Form("%s/%s/strip_count.pdf", outdir_, name_));
+        canvas_->Clear("D");
+        
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_strip_rate_[tdc]->Draw("BAR");
+        }
+        canvas_->Print(Form("%s/%s/strip_rate.pdf", outdir_, name_));
+        canvas_->Clear("D");
+        
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_channel_count_[tdc]->Draw("BAR");
+        }
+        canvas_->Print(Form("%s/%s/channel_count.pdf", outdir_, name_));
+        canvas_->Clear("D");
+        
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_channel_rate_[tdc]->Draw("BAR");
+        }
+        canvas_->Print(Form("%s/%s/channel_rate.pdf", outdir_, name_));
+        canvas_->Clear("D");
     }
+
 };
 
 

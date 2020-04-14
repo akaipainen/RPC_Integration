@@ -18,8 +18,8 @@ class WidthDistribution : public AnalysisTask
     std::vector<TProfile*> tdc_profile_channel_;
 
     // Change these to set size of printed canvas
-    static const int w = 2;
-    static const int h = 2;
+    static const int w = 3;
+    static const int h = 3;
 
 public:
     WidthDistribution(const char* name)
@@ -30,51 +30,46 @@ public:
 
     void init()
     {
-        gDirectory->mkdir("strip");
-        gDirectory->cd("strip");
-        gDirectory->mkdir("color");
-        gDirectory->mkdir("profile");
         for (int tdc = 0; tdc < 18; tdc++)
         {
-            gDirectory->cd("color");
-            tdc_color_strip_.push_back(new TH2F(Form("tdc_%d", tdc), Form("Width vs. Strip (tdc = %d)", tdc),
-                                                32, 0, 32, 128, 0, 128));
-            tdc_color_strip_.back()->GetXaxis()->SetTitle("Strip");
-            tdc_color_strip_.back()->GetYaxis()->SetTitle("Width");
+            tdc_color_strip_.push_back(
+                create_2d_histogram(Form("strip/color/tdc_%d", tdc),
+                                    Form("Width vs. Strip (tdc = %d)", tdc),
+                                    "Strip",
+                                    "Width [ns]",
+                                    0, 32, 1, 
+                                    0, 128, 1)
+            );
             tdc_color_strip_.back()->SetOption("COLZ");
-            gDirectory->cd("..");
 
-            gDirectory->cd("profile");
-            tdc_profile_strip_.push_back(new TProfile(Form("tdc_%d", tdc), Form("Width vs. Strip (tdc = %d)", tdc),
-                                         32, 0, 32, 0, 128));
-            tdc_profile_strip_.back()->GetXaxis()->SetTitle("Strip");
-            tdc_profile_strip_.back()->GetYaxis()->SetTitle("Width");
-            gDirectory->cd("..");
-        }
-        gDirectory->cd("..");
+            tdc_profile_strip_.push_back(
+                create_2d_profile(Form("strip/profile/tdc_%d", tdc),
+                                  Form("Width vs. Strip (tdc = %d)", tdc),
+                                  "Strip",
+                                  "Width [ns]",
+                                  0, 32, 1, 
+                                  0, 128)
+            );
 
-        gDirectory->mkdir("channel");
-        gDirectory->cd("channel");
-        gDirectory->mkdir("color");
-        gDirectory->mkdir("profile");
-        for (int tdc = 0; tdc < 18; tdc++)
-        {
-            gDirectory->cd("color");
-            tdc_color_channel_.push_back(new TH2F(Form("tdc_%d", tdc), Form("Width vs. Channel (tdc = %d)", tdc),
-                                                  32, 0, 32, 128, 0, 128));
-            tdc_color_channel_.back()->GetXaxis()->SetTitle("Channel");
-            tdc_color_channel_.back()->GetYaxis()->SetTitle("Width");
+            tdc_color_channel_.push_back(
+                create_2d_histogram(Form("channel/color/tdc_%d", tdc),
+                                    Form("Width vs. Channel (tdc = %d)", tdc),
+                                    "Channel",
+                                    "Width [ns]",
+                                    0, 32, 1, 
+                                    0, 128, 1)
+            );
             tdc_color_channel_.back()->SetOption("COLZ");
-            gDirectory->cd("..");
 
-            gDirectory->cd("profile");
-            tdc_profile_channel_.push_back(new TProfile(Form("tdc_%d", tdc), Form("Width vs. Channel (tdc = %d)", tdc),
-                                                        32, 0, 32, 0, 128));
-            tdc_profile_channel_.back()->GetXaxis()->SetTitle("Channel");
-            tdc_profile_channel_.back()->GetYaxis()->SetTitle("Width");
-            gDirectory->cd("..");
+            tdc_profile_channel_.push_back(
+                create_2d_profile(Form("channel/profile/tdc_%d", tdc),
+                                  Form("Width vs. Channel (tdc = %d)", tdc),
+                                  "Channel",
+                                  "Width [ns]",
+                                  0, 32, 1, 
+                                  0, 128)
+            );
         }
-        gDirectory->cd("..");
     }
 
     void execute()
@@ -91,26 +86,39 @@ public:
 
     void terminate()
     {
-        canvas_->Divide(2, 2);
+        canvas_->Divide(3, 3);
 
-        gStyle->SetOptStat(11);
-        for (int tdc = 0; tdc < 18; tdc++)
+        for (int tdc = 0; tdc < 9; tdc++)
         {
-            canvas_->cd(1);
+            cd_grid(tdc);
             tdc_color_strip_[tdc]->Draw();
-
-            canvas_->cd(2);
-            tdc_profile_strip_[tdc]->Draw();
-            
-            canvas_->cd(3);
-            tdc_color_channel_[tdc]->Draw();
-
-            canvas_->cd(4);
-            tdc_profile_channel_[tdc]->Draw();
-
-            canvas_->Print(Form("%s/%s/tdc_%d.pdf", outdir_, name_, tdc));
-            canvas_->Clear("D");
         }
+        canvas_->Print(Form("%s/%s/strip_color.pdf", outdir_, name_));
+        canvas_->Clear("D");
+
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_profile_strip_[tdc]->Draw();
+        }
+        canvas_->Print(Form("%s/%s/strip_profile.pdf", outdir_, name_));
+        canvas_->Clear("D");
+
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_color_channel_[tdc]->Draw();
+        }
+        canvas_->Print(Form("%s/%s/channel_color.pdf", outdir_, name_));
+        canvas_->Clear("D");
+
+        for (int tdc = 0; tdc < 9; tdc++)
+        {
+            cd_grid(tdc);
+            tdc_profile_channel_[tdc]->Draw();
+        }
+        canvas_->Print(Form("%s/%s/channel_profile.pdf", outdir_, name_));
+        canvas_->Clear("D");
     }
 };
 

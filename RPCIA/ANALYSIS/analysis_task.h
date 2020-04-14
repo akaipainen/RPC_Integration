@@ -6,6 +6,10 @@
 #include <TCanvas.h>
 #include <TStyle.h>
 #include <TSystem.h>
+#include <TPRegexp.h>
+#include <TH1.h>
+#include <TH2.h>
+#include <TProfile.h>
 
 #include "store.h"
 #include "digit.h"
@@ -16,6 +20,8 @@
 class AnalysisTask
 {
 protected:
+    std::vector<TH1*> plots_; // all plots are saved here
+
     Store<Digit> *digit_store_;
     Store<Cluster> *cluster_store_;
     Store<Track> *track_store_;
@@ -52,6 +58,30 @@ protected:
     virtual void execute() = 0;
     
     virtual void terminate() = 0;
+
+    // Helper methods to use
+
+    TH1F* create_1d_histogram(TString name, 
+                              TString title, 
+                              TString xaxis, 
+                              TString yaxis,
+                              int xmin, int xmax, double xspacing);
+
+    TH2F* create_2d_histogram(TString name, 
+                              TString title, 
+                              TString xaxis, 
+                              TString yaxis,
+                              double xmin, double xmax, double xspacing,
+                              double ymin, double ymax, double yspacing);
+
+    TProfile* create_2d_profile(TString name, 
+                              TString title, 
+                              TString xaxis, 
+                              TString yaxis,
+                              double xmin, double xmax, double xspacing,
+                              double ymin, double ymax);
+
+    void cd_grid(int tdc) const;
 
 };
 

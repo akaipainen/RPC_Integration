@@ -47,3 +47,118 @@ void AnalysisTask::terminate_task()
 
     canvas_->Close();
 }
+
+TH1F* AnalysisTask::create_1d_histogram(TString name, 
+                                        TString title, 
+                                        TString xaxis, 
+                                        TString yaxis,
+                                        int xmin, int xmax, 
+                                        double xspacing)
+{
+    // Handle path in histogram name
+    TPRegexp rpath(".*\\/");
+    TPRegexp rbase("[^/]+$");
+    TString path = name(rpath);
+    TString basename = name(rbase);
+
+    // Navigate to correct directory
+    gDirectory->mkdir(path);
+    gDirectory->cd(path);
+
+    // Calculate number of bins
+    int nbins = int((xmax - xmin) / xspacing);
+
+    // Create histogram
+    TH1F* hist = new TH1F(basename, title, nbins, xmin, xmax);
+    plots_.push_back(hist);
+    
+    // Set axis titles
+    hist->GetXaxis()->SetTitle(xaxis);
+    hist->GetYaxis()->SetTitle(yaxis);
+
+    // Un-navigate from directory
+    gDirectory->cd("..");
+
+    return hist;
+}
+
+TH2F* AnalysisTask::create_2d_histogram(TString name, 
+                                        TString title, 
+                                        TString xaxis, 
+                                        TString yaxis,
+                                        double xmin, double xmax, double xspacing,
+                                        double ymin, double ymax, double yspacing)
+{
+    // Handle path in histogram name
+    TPRegexp rpath(".*\\/");
+    TPRegexp rbase("[^/]+$");
+    TString path = name(rpath);
+    TString basename = name(rbase);
+
+    // Navigate to correct directory
+    gDirectory->mkdir(path);
+    gDirectory->cd(path);
+
+    // Calculate number of bins
+    int xbins = int((xmax - xmin) / xspacing);
+    int ybins = int((ymax - ymin) / yspacing);
+
+    // Create histogram
+    TH2F* hist = new TH2F(basename, title, xbins, xmin, xmax, ybins, ymin, ymax);
+    plots_.push_back(hist);
+    
+    // Set axis titles
+    hist->GetXaxis()->SetTitle(xaxis);
+    hist->GetYaxis()->SetTitle(yaxis);
+
+    // Un-navigate from directory
+    gDirectory->cd("..");
+
+    return hist;
+}
+
+TProfile* AnalysisTask::create_2d_profile(TString name, 
+                                      TString title, 
+                                      TString xaxis, 
+                                      TString yaxis,
+                                      double xmin, double xmax, double xspacing,
+                                      double ymin, double ymax)
+{
+    // Handle path in histogram name
+    TPRegexp rpath(".*\\/");
+    TPRegexp rbase("[^/]+$");
+    TString path = name(rpath);
+    TString basename = name(rbase);
+
+    // Navigate to correct directory
+    gDirectory->mkdir(path);
+    gDirectory->cd(path);
+
+    // Calculate number of bins
+    int xbins = int((xmax - xmin) / xspacing);
+
+    // Create histogram
+    TProfile* prof = new TProfile(basename, title, xbins, xmin, xmax, ymin, ymax);
+    plots_.push_back(prof);
+    
+    // Set axis titles
+    prof->GetXaxis()->SetTitle(xaxis);
+    prof->GetYaxis()->SetTitle(yaxis);
+
+    // Un-navigate from directory
+    gDirectory->cd("..");
+
+    return prof;
+}
+
+void AnalysisTask::cd_grid(int tdc) const
+{
+    if (tdc < 3)
+        canvas_->cd(tdc*3+1);
+    else if (tdc < 5)
+        canvas_->cd(tdc-1);
+    else if (tdc < 7)
+        canvas_->cd(tdc);
+    else
+        canvas_->cd(tdc+1);
+}
