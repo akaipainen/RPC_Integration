@@ -36,6 +36,7 @@ TDC::TDC()
 
     bcid_resolution_ns = 25;
     fine_time_resolution_ns = 0.1953125; // 25ns / 2^7 precision of TDC
+    width_time_resolution_ns = 0.4;
 }
 
 TDC::~TDC()
@@ -68,6 +69,11 @@ double TDC::combined_time_ns_imp(int bcid, int fine_time) const
     return bcid_resolution_ns * bcid + fine_time_resolution_ns * fine_time;
 }
 
+double TDC::width_time_ns_imp(int width) const
+{
+    return width_time_resolution_ns * width;
+}
+
 // ############### Static functions ################
 
 int TDC::channel_to_strip(int channel)
@@ -83,4 +89,9 @@ int TDC::strip_to_channel(int strip)
 double TDC::combined_time_ns(int bcid, int fine_time)
 {
     return TDC::get().combined_time_ns_imp(bcid, fine_time);
+}
+
+double TDC::width_time_ns(int width)
+{
+    return TDC::get().width_time_ns_imp(width);
 }

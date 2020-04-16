@@ -8,10 +8,12 @@
 #include <TCanvas.h>
 #include <TH1.h>
 
+#include "summary_hist.h"
+
 class MuonDistribution : public AnalysisTask
 {
-    std::vector<TH1F *> tdc_strip_rate_;
-    std::vector<TH1F *> tdc_channel_rate_;
+    SummaryHist<TH1F> strip_rate_;
+    SummaryHist<TH1F> channel_rate_;
     
     const double& run_duration_; // Run duration in seconds
 
@@ -22,47 +24,17 @@ class MuonDistribution : public AnalysisTask
 public:
     MuonDistribution(const char* name, const double& input=1)
      : AnalysisTask(name, 500*w, 300*h)
+     , strip_rate_("strip_rate")
+     , channel_rate_("channel_rate")
      , run_duration_(input)
     { }
 
     ~MuonDistribution();
 
-    void set_style(TH1* hist)
-    {
-        // Customize style
-        hist->SetFillColor(16); // Bar color
-        hist->SetLineColor(kBlack); // Error bar color
-        hist->SetBarWidth(0.8); // Set bar width
-        hist->SetBarOffset(0.1);
-
-        for (int i = 0; i < 32; i++)
-        {
-            hist->GetXaxis()->SetBinLabel(i+1, Form("%d", i));
-        }
-    }
-
     void init()
     {
-        for (int tdc = 0; tdc < 18; tdc++)
-        {
-            tdc_strip_rate_.push_back(
-                create_1d_histogram(Form("strip/rate/tdc_%d", tdc),
-                                    Form("Muon Rate by Strip (tdc = %d)", tdc),
-                                    "Strip",
-                                    "Muon Rate [Hz]",
-                                    0, 32, 1)
-            );
-            set_style(tdc_strip_rate_.back());
-
-            tdc_channel_rate_.push_back(
-                create_1d_histogram(Form("channel/rate/tdc_%d", tdc),
-                                    Form("Muon Rate by Channel (tdc = %d)", tdc),
-                                    "Channel",
-                                    "Muon Rate [Hz]",
-                                    0, 32, 1)
-            );
-            set_style(tdc_channel_rate_.back());
-        }
+        strip_rate_.init(9, 32, 0, 32);
+        channel_rate_.init(9, 32, 0, 32);
     }
 
     void execute()
@@ -71,31 +43,27 @@ public:
         {
             if (dit->muon())
             {
-                tdc_strip_rate_[dit->tdc()]->Fill(dit->strip(), 1.0/run_duration_);
-                tdc_channel_rate_[dit->tdc()]->Fill(dit->channel(), 1.0/run_duration_);
+                strip_rate_[dit->tdc()].Fill(dit->strip(), 1.0/run_duration_);
+                channel_rate_[dit->tdc()].Fill(dit->channel(), 1.0/run_duration_);
             }
         }
     }
 
     void terminate()
     {
-        canvas_->Divide(3, 3);
+        strip_rate_.configure("XNUMS");
+        channel_rate_.configure("XNUMS");
 
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_strip_rate_[tdc]->Draw("BAR");
-        }
+        strip_rate_.configure_titles("Strip", "Muon Hits [Hz]");
+        channel_rate_.configure_titles("Channel", "Muon Hits [Hz]");
+
+        strip_rate_.draw(canvas_, 0, "BAR E0");
         canvas_->Print(Form("%s/%s/strip_rate.pdf", outdir_, name_));
-        canvas_->Clear("D");
+        canvas_->Clear();
 
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_channel_rate_[tdc]->Draw("BAR");
-        }
+        channel_rate_.draw(canvas_, 0, "BAR E0");
         canvas_->Print(Form("%s/%s/channel_rate.pdf", outdir_, name_));
-        canvas_->Clear("D");
+        canvas_->Clear();
     }
 };
 

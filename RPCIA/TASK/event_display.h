@@ -4,52 +4,53 @@
 #include "analysis_task.h"
 
 #include <vector>
+#include <iostream>
 
 #include <TH2.h>
 
 #include "tdc.h"
+#include "summary_hist.h"
 
 class EventDisplay : public AnalysisTask
 {
     std::vector<int> *input_;
-    std::vector<TH2F *> muon_;
-    std::vector<TH2F *> noise_;
+    SummaryHist<TH2F> muon_;
+    SummaryHist<TH2F> noise_;
     int counter_;
+
+    int muon_hits_;
+    int noise_hits_;
+
+    std::vector<int> muon_hits_tdc_;
+    std::vector<int> noise_hits_tdc_;
 
 public:
     EventDisplay(const char *name, std::vector<int> *input=nullptr)
      : AnalysisTask(name, 500, 300)
      , input_(input)
+     , muon_("muon")
+     , noise_("noise")
      , counter_(0)
+     , muon_hits_(0)
+     , noise_hits_(0)
     { }
 
     ~EventDisplay()
-    {
-        for (auto tdc = 0; tdc < 9; tdc++)
-        {
-            delete muon_[tdc];
-            delete noise_[tdc];
-        }
-    }
+    { }
 
     void init()
     {
-        canvas_->Divide(3, 3);
+        muon_.init(9, 32, 0, 32, 50/25*128, 0, 50);
+        noise_.init(9, 32, 0, 32, 50/25*128, 0, 50);
 
-        for (auto tdc = 0; tdc < 9; tdc++)
-        {
-            muon_.push_back(new TH2F(Form("muon_tdc_%d", tdc), "Event",
-                                    32, 0, 32, 50/25*128, 0, 50));
-            muon_.back()->GetXaxis()->SetTitle("Strip");
-            muon_.back()->GetYaxis()->SetTitle("Time");
-            muon_.back()->SetLineColor(kRed);
-            
-            noise_.push_back(new TH2F(Form("noise_tdc_%d", tdc), "Event",
-                                    32, 0, 32, 50/25*128, 0, 50));
-            noise_.back()->GetXaxis()->SetTitle("Strip");
-            noise_.back()->GetYaxis()->SetTitle("Time");
-            noise_.back()->SetLineColor(kBlue);
-        }
+        muon_.configure("XNUMS");
+        noise_.configure("XNUMS");
+
+        muon_.configure_titles("Strip", "Time [ns]");
+        noise_.configure_titles("Strip", "Time [ns]");
+
+        muon_.for_each(&TH2F::SetFillColor, short(kRed));
+        noise_.for_each(&TH2F::SetFillColor, short(kBlue));
     }
 
     void execute()
@@ -72,38 +73,43 @@ public:
         {
             // Reset histograms
             for (auto tdc = 0; tdc < 9; tdc++) {
-                muon_[tdc]->Reset("ICESM");
-                noise_[tdc]->Reset("ICESM");
+                muon_[tdc].Reset("ICESM");
+                noise_[tdc].Reset("ICESM");
             }
+            muon_hits_ = 0;
+            noise_hits_ = 0;
 
             // Fill histograms
             for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
             {
-                if (dit->muon()) muon_[dit->tdc()]->Fill(dit->strip(), TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())-first_time);
-                else noise_[dit->tdc()]->Fill(dit->strip(), TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())-first_time);
+                if (dit->muon()) 
+                {
+                    muon_[dit->tdc()].Fill(dit->strip(), TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())-first_time);
+                    muon_hits_++;
+                }
+                else 
+                {
+                    noise_[dit->tdc()].Fill(dit->strip(), TDC::combined_time_ns(dit->bcid_tdc(), dit->fine_time())-first_time);
+                    noise_hits_++;
+                }
             }
             
-            // Draw to canvases
-            for (auto tdc = 0; tdc < 9; tdc++)
+            if (noise_hits_ > 0)
             {
-                if (tdc < 3)
-                    canvas_->cd(tdc*3+1);
-                else if (tdc < 5)
-                    canvas_->cd(tdc-1);
-                else if (tdc < 7)
-                    canvas_->cd(tdc);
-                else
-                    canvas_->cd(tdc+1);
-
-                muon_[tdc]->SetTitle(Form("Event %d (tdc=%d)", trigger_id, tdc));
-                muon_[tdc]->Draw("BOX");
-                noise_[tdc]->Draw("BOX SAME");
-                
-                // muon_[tdc]->Reset();
+                std::cout << noise_hits_ << "/" << noise_hits_+muon_hits_ << std::endl;
+                // Draw to canvases
+                if (noise_hits_ == 0) muon_.draw(canvas_, 0, "BOX");
+                else if (muon_hits_ == 0) noise_.draw(canvas_, 0, "BOX");
+                else 
+                {
+                    muon_.draw(canvas_, 0, "BOX");
+                    noise_.draw(canvas_, 0, "BOX SAME", true);
+                }
+            
+                canvas_->Print(Form("%s/%s/%d.pdf", outdir_, name_, trigger_id));
+                canvas_->Clear();
+                counter_++;
             }
-            canvas_->Print(Form("%s/%s/%d.pdf", outdir_, name_, trigger_id));
-            canvas_->Clear("D");
-            counter_++;
         }
     }
 

@@ -29,25 +29,16 @@ public:
     // Connect this store to a TTree
     Bool_t connect(TTree &tree);
 
-    // Add a TObject to the store, if it can be downcast
-    // Bool_t add(const TObject &object);
-
     // Add an Obj to the store
     Bool_t add(T &obj);
 
     // Clear and delete all objects from store
     void clear();
 
-    // Begin iterator to loop over all objects
-    // Iterator<T> begin() const;
-
-    // End iterator to loop over all objects
-    // Iterator<T> end() const;
-
-    // Begin non const iterator
+    // Begin const iterator
     Iterator<T> begin() const;
 
-    // End non const iterator
+    // End const iterator
     Iterator<T> end() const;
 
     // Return front object

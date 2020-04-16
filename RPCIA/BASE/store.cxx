@@ -61,17 +61,6 @@ Bool_t Store<T>::connect(TTree &tree)
     }
 }
 
-// template <class T>
-// Bool_t Store<T>::add(const TObject &object)
-// {
-//     const T *obj = dynamic_cast<const T*>(&object);
-//     if (obj)
-//     {
-//         return add(*obj);
-//     }
-//     return kFALSE;
-// }
-
 template <class T>
 Bool_t Store<T>::add(T &object)
 {

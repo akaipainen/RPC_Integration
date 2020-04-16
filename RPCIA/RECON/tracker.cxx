@@ -1,5 +1,7 @@
 #include "tracker.h"
 
+#include <iostream>
+
 Tracker::Tracker()
 {
 }
@@ -16,6 +18,10 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
 {
     track_store->clear();
 
+    if (track_store->trigger_id() == 201) {
+        std::cout;
+    }
+
     // Find segments
     for (auto cit = cluster_store->begin(); cit != cluster_store->end(); cit++)
     {
@@ -31,6 +37,7 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
             }
         }
     }
+
 
     // Combine segments
     for (auto tit = track_store->begin(); tit != track_store->end(); tit++)
@@ -97,7 +104,7 @@ bool Tracker::should_segment(const Cluster &c1, const Cluster &c2) const
 {
     // cluster.position yields (eta strip, phi strip, layer) vector
 
-    // Clusters must not be on same layer
+    // Clusters must be on different layers
     if (abs(c1.position()[2] - c2.position()[2]) == 0) 
     {
         return false;
@@ -115,11 +122,11 @@ bool Tracker::should_segment(const Cluster &c1, const Cluster &c2) const
 
     // Clusters' center of charge must not 
     // be more than one strip apart
-    if (abs(c1.position()[0] - c2.position()[0]) > 1)
+    if (abs(c1.position()[0] - c2.position()[0]) >= 2)
     {
         return false;
     }
-    if (abs(c1.position()[1] - c2.position()[1]) > 1)
+    if (abs(c1.position()[1] - c2.position()[1]) >= 2)
     {
         return false;
     }

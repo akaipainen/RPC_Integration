@@ -24,7 +24,8 @@ void AnalysisManager::init(TTree *tree)
 
     // Set global styles
     gStyle->SetHistMinimumZero();
-    gStyle->SetOptStat(11);
+    // gStyle->SetOptStat(0);
+    // gStyle->SetOptFit(0);
 }
 
 void AnalysisManager::add_task(AnalysisTask *task)

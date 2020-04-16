@@ -102,6 +102,23 @@ void Track::merge(const Track &track)
     for (auto &cluster: track.clusters_)
     {
         add(&cluster);
+        // // Check if could merge new track's cluster with existing cluster
+        // auto cit = clusters_.begin();
+        // while (cit != clusters_.end())
+        // {
+        //     // If clusters are on same layer, merge them
+        //     if (cluster.position()[2] == cit->position()[2])
+        //     {
+        //         cit->merge_with(cluster);
+
+        //     }
+        //     cit++;
+        // }
+        // if (cit == clusters_.end())
+        // {
+        //     add(&cluster);
+        // }
+        
     }
     init();
 }

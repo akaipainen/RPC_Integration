@@ -8,15 +8,25 @@
 #include <TCanvas.h>
 #include <TH1.h>
 
+#include "summary_hist.h"
+
 class HitDistribution : public AnalysisTask
 {
-    std::vector<TH1F *> tdc_strip_rate_;
-    std::vector<TH1F *> tdc_channel_rate_;
+    SummaryHist<TH1F> strip_rate_all_;
+    SummaryHist<TH1F> channel_rate_all_;
     
-    std::vector<TH1F *> tdc_strip_count_;
-    std::vector<TH1F *> tdc_channel_count_;
+    SummaryHist<TH1F> strip_count_all_;
+    SummaryHist<TH1F> channel_count_all_;
+    
+    SummaryHist<TH1F> strip_rate_muon_;
+    SummaryHist<TH1F> channel_rate_muon_;
+    
+    SummaryHist<TH1F> strip_rate_noise_;
+    SummaryHist<TH1F> channel_rate_noise_;
     
     const double& run_duration_; // Run duration in seconds
+
+    int num_events_;
 
     // Change these to set size of printed canvas
     static const int w = 3;
@@ -25,117 +35,121 @@ class HitDistribution : public AnalysisTask
 public:
     HitDistribution(const char* name, const double& input=1)
      : AnalysisTask(name, 500*w, 300*h)
+     , strip_rate_all_("strip_rate_all")
+     , channel_rate_all_("channel_rate_all")
+     , strip_count_all_("strip_count_all")
+     , channel_count_all_("channel_count_all")
+     , strip_rate_muon_("strip_rate_muon")
+     , channel_rate_muon_("channel_rate_muon")
+     , strip_rate_noise_("strip_rate_noise")
+     , channel_rate_noise_("channel_rate_noise")
      , run_duration_(input)
+     , num_events_(0)
     { }
 
     ~HitDistribution();
 
-    void set_style(TH1* hist)
-    {
-        // Customize style
-        hist->SetFillColor(16); // Bar color
-        hist->SetLineColor(kBlack); // Error bar color
-        hist->SetBarWidth(0.8); // Set bar width
-        hist->SetBarOffset(0.1);
-
-        for (int i = 0; i < 32; i++)
-        {
-            hist->GetXaxis()->SetBinLabel(i+1, Form("%d", i));
-        }
-    }
-
     void init()
     {
-        // Create histograms
-        for (int tdc = 0; tdc < 18; tdc++)
-        {
-            tdc_strip_count_.push_back(
-                create_1d_histogram(Form("strip/count/tdc_%d", tdc),
-                                    Form("Total Hit Count by Strip (tdc = %d)", tdc),
-                                    "Strip",
-                                    "Hit Count",
-                                    0, 32, 1)
-            );
-            set_style(tdc_strip_count_.back());
-                
-            tdc_strip_rate_.push_back(
-                create_1d_histogram(Form("strip/rate/tdc_%d", tdc),
-                                    Form("Hit Rate by Strip (tdc = %d)", tdc),
-                                    "Strip",
-                                    "Hit Rate [Hz]",
-                                    0, 32, 1)
-            );
-            set_style(tdc_strip_rate_.back());
+        strip_rate_all_.init(9, 32, 0, 32);
+        channel_rate_all_.init(9, 32, 0, 32);
 
-            tdc_channel_count_.push_back(
-                create_1d_histogram(Form("channel/count/tdc_%d", tdc),
-                                    Form("Total Hit Count by Channel (tdc = %d)", tdc),
-                                    "Channel",
-                                    "Hit Count",
-                                    0, 32, 1)
-            );
-            set_style(tdc_channel_count_.back());
-                
-            tdc_channel_rate_.push_back(
-                create_1d_histogram(Form("channel/rate/tdc_%d", tdc),
-                                    Form("Hit Rate by Channel (tdc = %d)", tdc),
-                                    "Channel",
-                                    "Hit Rate [Hz]",
-                                    0, 32, 1)
-            );
-            set_style(tdc_channel_rate_.back());
-        }
+        strip_count_all_.init(9, 32, 0, 32);
+        channel_count_all_.init(9, 32, 0, 32);
+
+        strip_rate_muon_.init(9, 32, 0, 32);
+        channel_rate_muon_.init(9, 32, 0, 32);
+
+        strip_rate_noise_.init(9, 32, 0, 32);
+        channel_rate_noise_.init(9, 32, 0, 32);
     }
 
     void execute()
     {
         for (auto dit = digit_store_->begin(); dit != digit_store_->end(); dit++)
         {
-            tdc_strip_count_[dit->tdc()]->Fill(dit->strip());
-            tdc_strip_rate_[dit->tdc()]->Fill(dit->strip(), 1.0/run_duration_);
+            // all
+            strip_rate_all_[dit->tdc()].Fill(dit->strip(), 1.0/run_duration_);
+            channel_rate_all_[dit->tdc()].Fill(dit->channel(), 1.0/run_duration_);
+            
+            strip_count_all_[dit->tdc()].Fill(dit->strip());
+            channel_count_all_[dit->tdc()].Fill(dit->channel());
 
-            tdc_channel_count_[dit->tdc()]->Fill(dit->channel());
-            tdc_channel_rate_[dit->tdc()]->Fill(dit->channel(), 1.0/run_duration_);
+            if (dit->muon()) // muon
+            {
+                strip_rate_muon_[dit->tdc()].Fill(dit->strip(), 1.0/run_duration_);
+                channel_rate_muon_[dit->tdc()].Fill(dit->channel(), 1.0/run_duration_);
+            }
+            else { // noise
+                strip_rate_noise_[dit->tdc()].Fill(dit->strip());
+                channel_rate_noise_[dit->tdc()].Fill(dit->channel());
+            }
         }
+        num_events_++;
     }
 
     void terminate()
     {
-        canvas_->Divide(3, 3);
+        gStyle->SetOptStat(0);
+        gStyle->SetOptFit(0);
 
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_strip_count_[tdc]->Draw("BAR");
-        }
-        canvas_->Print(Form("%s/%s/strip_count.pdf", outdir_, name_));
-        canvas_->Clear("D");
+        strip_rate_all_.configure("XNUMS");
+        channel_rate_all_.configure("XNUMS");
+        strip_count_all_.configure("XNUMS");
+        channel_count_all_.configure("XNUMS");
+        strip_rate_muon_.configure("XNUMS");
+        channel_rate_muon_.configure("XNUMS");
+        strip_rate_noise_.configure("XNUMS");
+        channel_rate_noise_.configure("XNUMS");
+
+        strip_rate_all_.configure_titles("Strip", "All Hits [Hz]");
+        channel_rate_all_.configure_titles("Channel", "All Hits [Hz]");
+        strip_count_all_.configure_titles("Strip", "All Hits [Count]");
+        channel_count_all_.configure_titles("Channel", "All Hits [Count]");
+        strip_rate_muon_.configure_titles("Strip", "Muon Hits [Hz]");
+        channel_rate_muon_.configure_titles("Channel", "Muon Hits [Hz]");
+        strip_rate_noise_.configure_titles("Strip", "Noise Hits [KHz]");
+        channel_rate_noise_.configure_titles("Channel", "Noise Hits [KHz]");
+
+        // Scale noise counts to rates
+        strip_rate_noise_.for_each(&TH1F::Scale, 1/(num_events_*0.0016), "");
+        channel_rate_noise_.for_each(&TH1F::Scale, 1/(num_events_*0.0016), "");
+
+        // All hits
+        strip_rate_all_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/strip_rate_all.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        channel_rate_all_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/channel_rate_all.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        strip_count_all_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/strip_count_all.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        channel_count_all_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/channel_count_all.pdf", outdir_, name_));
+        canvas_->Clear();
         
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_strip_rate_[tdc]->Draw("BAR");
-        }
-        canvas_->Print(Form("%s/%s/strip_rate.pdf", outdir_, name_));
-        canvas_->Clear("D");
-        
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_channel_count_[tdc]->Draw("BAR");
-        }
-        canvas_->Print(Form("%s/%s/channel_count.pdf", outdir_, name_));
-        canvas_->Clear("D");
-        
-        for (int tdc = 0; tdc < 9; tdc++)
-        {
-            cd_grid(tdc);
-            tdc_channel_rate_[tdc]->Draw("BAR");
-        }
-        canvas_->Print(Form("%s/%s/channel_rate.pdf", outdir_, name_));
-        canvas_->Clear("D");
+        // Muon hits
+        strip_rate_muon_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/strip_rate_muon.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        channel_rate_muon_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/channel_rate_muon.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        // Noise hits
+        strip_rate_noise_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/strip_rate_noise.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        channel_rate_noise_.draw(canvas_, 0, "BAR E0");
+        canvas_->Print(Form("%s/%s/channel_rate_noise.pdf", outdir_, name_));
+        canvas_->Clear();
     }
-
 };
 
 

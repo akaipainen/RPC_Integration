@@ -10,6 +10,7 @@ include_directories(SYSTEM ${ROOT_INCLUDE_DIR})
 include_directories(${RpcIA_SOURCE_DIR}/BASE
                     ${RpcIA_SOURCE_DIR}/ANALYSIS
                     ${RpcIA_SOURCE_DIR}/MAPPING
+                    ${RpcIA_SOURCE_DIR}/RECON
                     )
 
 # Set sources in alphabetical order
@@ -31,7 +32,7 @@ get_directory_property(incdirs INCLUDE_DIRECTORIES)
 generate_dictionary("${MODULE}" "${MODULE}LinkDef.h" "${HDRS}" "${incdirs}")
 
 # Generate the ROOT map
-set(LIBDEPS BASE MAPPING ANALYSIS Hist Gpad)
+set(LIBDEPS BASE MAPPING ANALYSIS RECON Hist Gpad)
 generate_rootmap("${MODULE}" "${LIBDEPS}" "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE}LinkDef.h")
 
 # Create object to be used in case of static libraries

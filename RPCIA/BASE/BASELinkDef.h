@@ -5,6 +5,9 @@
 #pragma link C++ class Digit*+;
 #pragma link C++ class Cluster*+;
 #pragma link C++ class Track*+;
+#pragma link C++ class Store<Digit>+;
+#pragma link C++ class Store<Cluster>+;
+#pragma link C++ class Store<Track>+;
 #pragma link C++ class vector<Digit*>+;
 #pragma link C++ class vector<Digit*>::iterator-;
 #pragma link C++ class vector<Digit*>::const_iterator-;

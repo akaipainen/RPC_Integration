@@ -9,6 +9,10 @@ AnalysisTask::AnalysisTask(const char *name, int width, int height)
 AnalysisTask::~AnalysisTask()
 {
     delete canvas_;
+    for (auto it = plots_.begin(); it != plots_.end(); it++)
+    {
+        delete *it;
+    }
 }
 
 void AnalysisTask::connect_inputs(Store<Digit> *digits, Store<Cluster> *clusters, Store<Track> *tracks)
