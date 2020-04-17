@@ -20,7 +20,7 @@ set(SRCS
 string(REPLACE ".cxx" ".h" HDRS "${SRCS}")
 
 # Additional headers
-list(APPEND HDRS "summary_hist.h")
+list(APPEND HDRS "summary_hist.h" "layer_hist.h")
 
 # Generate the dictionary
 get_directory_property(incdirs INCLUDE_DIRECTORIES)

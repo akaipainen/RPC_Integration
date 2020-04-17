@@ -26,7 +26,6 @@
 // #include "muon_distribution.h"
 // #include "noise_distribution.h"
 #include "width_distribution.h"
-#include "timing_distribution.h"
 #include "event_hits_on_strip.h"
 #include "cluster_size.h"
 #include "event_display.h"
@@ -63,7 +62,7 @@ int main(int argc, char *argv[]) {
     // mgr.add_task(new TimingDistribution("timing_distribution"));
     mgr.add_task(new TimeDifferenceFromAverage("time_distribution", nullptr, time_offsets));
     mgr.add_task(new EventDisplay("event_display1", event_display));
-    // mgr.add_task(new ClusterSize("cluster_size"));
+    mgr.add_task(new ClusterSize("cluster_size"));
     // mgr.add_task(new TimeDifferenceVsDistance("time_difference_vs_distance"));
     // mgr.add_task(new ExtraHitsOnStrip("extra_hits_on_strip"));
     // mgr.add_task(new EventHitsOnStrip("event_hits_on_strip"));

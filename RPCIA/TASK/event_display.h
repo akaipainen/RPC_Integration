@@ -105,6 +105,9 @@ public:
                     muon_.draw(canvas_, 0, "BOX");
                     noise_.draw(canvas_, 0, "BOX SAME", true);
                 }
+
+                gStyle->SetOptStat(0);
+                gStyle->SetOptFit(0);
             
                 canvas_->Print(Form("%s/%s/%d.pdf", outdir_, name_, trigger_id));
                 canvas_->Clear();

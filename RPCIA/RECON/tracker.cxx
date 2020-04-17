@@ -18,10 +18,6 @@ void Tracker::find_pretracks(Store<Cluster> *cluster_store, Store<Track> *track_
 {
     track_store->clear();
 
-    if (track_store->trigger_id() == 201) {
-        std::cout;
-    }
-
     // Find segments
     for (auto cit = cluster_store->begin(); cit != cluster_store->end(); cit++)
     {

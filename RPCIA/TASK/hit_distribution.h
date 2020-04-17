@@ -9,6 +9,7 @@
 #include <TH1.h>
 
 #include "summary_hist.h"
+#include "layer_hist.h"
 
 class HitDistribution : public AnalysisTask
 {
@@ -23,6 +24,8 @@ class HitDistribution : public AnalysisTask
     
     SummaryHist<TH1F> strip_rate_noise_;
     SummaryHist<TH1F> channel_rate_noise_;
+
+    LayerHist<TH1F> event_hits_;
     
     const double& run_duration_; // Run duration in seconds
 
@@ -43,6 +46,7 @@ public:
      , channel_rate_muon_("channel_rate_muon")
      , strip_rate_noise_("strip_rate_noise")
      , channel_rate_noise_("channel_rate_noise")
+     , event_hits_("event_hits")
      , run_duration_(input)
      , num_events_(0)
     { }
@@ -62,6 +66,8 @@ public:
 
         strip_rate_noise_.init(9, 32, 0, 32);
         channel_rate_noise_.init(9, 32, 0, 32);
+
+        event_hits_.init(9, 128, 0, 128);
     }
 
     void execute()
@@ -85,6 +91,7 @@ public:
                 channel_rate_noise_[dit->tdc()].Fill(dit->channel());
             }
         }
+        event_hits_[3*(1-Detector::tdc_direction(digit_store_->begin()->tdc()))+Detector::tdc_layer(digit_store_->begin()->tdc())].Fill(digit_store_->size());
         num_events_++;
     }
 
@@ -110,6 +117,8 @@ public:
         channel_rate_muon_.configure_titles("Channel", "Muon Hits [Hz]");
         strip_rate_noise_.configure_titles("Strip", "Noise Hits [KHz]");
         channel_rate_noise_.configure_titles("Channel", "Noise Hits [KHz]");
+
+        event_hits_.configure_titles("Number of hits in event", "Count");
 
         // Scale noise counts to rates
         strip_rate_noise_.for_each(&TH1F::Scale, 1/(num_events_*0.0016), "");
@@ -148,6 +157,11 @@ public:
 
         channel_rate_noise_.draw(canvas_, 0, "BAR E0");
         canvas_->Print(Form("%s/%s/channel_rate_noise.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        // Event hits
+        event_hits_.draw(canvas_, 0, "", true);
+        canvas_->Print(Form("%s/%s/event_hits.pdf", outdir_, name_));
         canvas_->Clear();
     }
 };

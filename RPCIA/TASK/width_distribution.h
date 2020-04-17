@@ -11,6 +11,7 @@
 
 #include "tdc.h"
 #include "summary_hist.h"
+#include "layer_hist.h"
 
 class WidthDistribution : public AnalysisTask
 {
@@ -32,6 +33,9 @@ class WidthDistribution : public AnalysisTask
     // Number of hits
     SummaryHist<TH2F> num_hits_;
 
+    // All hits (phi/eta)
+    LayerHist<TH1F> layer_;
+
     static const int w = 3;
     static const int h = 3;
 
@@ -46,6 +50,7 @@ public:
      , channel_noise_("channel_noise")
      , cluster_size_("cluster_size")
      , num_hits_("num_hits")
+     , layer_("layer")
     { }
 
     ~WidthDistribution();
@@ -60,6 +65,8 @@ public:
         channel_noise_.init(9, 32, 0, 32, 128, 0, 128);
         cluster_size_.init(9, 32, 0, 32, 128, 0, 128);
         num_hits_.init(9, 32, 0, 32, 128, 0, 128);
+
+        layer_.init(9, 128, 0, 128);
     }
 
     void execute()
@@ -81,6 +88,8 @@ public:
             }
             // num hits
             num_hits_[dit->tdc()].Fill(digit_store_->size(), dit->width());
+            // layer
+            layer_[3 * (1 - Detector::tdc_direction(dit->tdc())) + Detector::tdc_layer(dit->tdc())].Fill(dit->width());
         }
         for (auto cit = cluster_store_->begin(); cit != cluster_store_->end(); cit++)
         {
@@ -88,7 +97,6 @@ public:
             {
                 cluster_size_[dit->tdc()].Fill(cit->num_digits(), dit->width());
             }
-            
         }
     }
 
@@ -102,6 +110,7 @@ public:
         channel_noise_.configure("XNUMS COLZ");
         cluster_size_.configure("SEP COLZ");
         num_hits_.configure("SEP COLZ");
+        layer_.configure();
 
         strip_all_.configure_titles("Strip", "Width");
         channel_all_.configure_titles("Strip", "Width");
@@ -111,6 +120,7 @@ public:
         channel_noise_.configure_titles("Strip", "Width");
         cluster_size_.configure_titles("Cluster Size", "Width");
         num_hits_.configure_titles("Number of Hits", "Width");
+        layer_.configure_titles("Width", "Count");
 
         strip_all_.draw(canvas_);
         canvas_->Print(Form("%s/%s/strip_all.pdf", outdir_, name_));
@@ -142,6 +152,10 @@ public:
 
         num_hits_.draw(canvas_);
         canvas_->Print(Form("%s/%s/num_hits.pdf", outdir_, name_));
+        canvas_->Clear();
+
+        layer_.draw(canvas_);
+        canvas_->Print(Form("%s/%s/layer.pdf", outdir_, name_));
         canvas_->Clear();
     }
 };
